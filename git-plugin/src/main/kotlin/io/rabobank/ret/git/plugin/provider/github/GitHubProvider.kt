@@ -7,6 +7,7 @@ import io.rabobank.ret.git.plugin.provider.PipelineRun
 import io.rabobank.ret.git.plugin.provider.PullRequest
 import io.rabobank.ret.git.plugin.provider.PullRequestCreated
 import io.rabobank.ret.git.plugin.provider.Repository
+import io.rabobank.ret.git.plugin.provider.azure.toGenericDomain
 
 class GitHubProvider(
     private val gitHubClient: GitHubClient,
