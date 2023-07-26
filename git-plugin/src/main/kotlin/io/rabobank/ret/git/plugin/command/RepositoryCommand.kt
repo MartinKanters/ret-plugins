@@ -2,6 +2,7 @@ package io.rabobank.ret.git.plugin.command
 
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
 import io.rabobank.ret.util.Logged
@@ -29,10 +30,10 @@ class RepositoryCommand(
             description = ["Repository name to open in the browser"],
             paramLabel = "<repository>",
             completionCandidates = RepositoryCompletionCandidates::class,
-        ) repositoryName: String?,
+        ) repositoryFlag: String?,
     ) {
         val repository =
-            requireNotNull(repositoryName ?: retContext.gitRepository) {
+            requireNotNull(ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)) {
                 "No repository provided and ret cannot get repository from context."
             }
 

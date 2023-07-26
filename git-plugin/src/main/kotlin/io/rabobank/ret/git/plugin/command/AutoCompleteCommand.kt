@@ -7,6 +7,9 @@ import io.rabobank.ret.git.plugin.provider.GitProvider
 import io.rabobank.ret.git.plugin.provider.Pipeline
 import io.rabobank.ret.git.plugin.provider.PipelineRun
 import io.rabobank.ret.git.plugin.provider.PullRequest
+import io.rabobank.ret.git.plugin.output.OutputHandler
+import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.Logged
 import io.rabobank.ret.util.RegexUtils.DIGITS_PATTERN
@@ -30,13 +33,13 @@ class AutoCompleteCommand(
     @Mixin
     lateinit var contextAwareness: ContextAwareness
 
-    // TODO - Add repository as flag
-    @Command(name = "pipeline")
+    @Command(name = "git-pipeline")
     fun printPipelines(
         @Option(names = ["--word", "-w"]) word: String?,
+        @Option(names = ["--repository", "-r"]) repositoryFlag: String?,
     ) {
-        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
-        val pipelines = gitProvider.getAllPipelines(repositoryInContext)
+        val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
+        val pipelines = gitProvider.getAllPipelines(repository)
 
         outputHandler.listPipelines(
             pipelines.filter { it.matches(word) }
@@ -44,7 +47,6 @@ class AutoCompleteCommand(
         )
     }
 
-    // TODO - Add repository as flag
     @Command(name = "pipeline-run")
     fun printPipelineRuns(
         @Option(names = ["--word", "-w"]) word: String?,
@@ -53,15 +55,17 @@ class AutoCompleteCommand(
             names = ["--pipeline-id"],
             description = ["Filter on pipeline"],
         ) pipelineIdFlag: String,
+        @Option(names = ["--repository", "-r"]) repositoryFlag: String?,
     ) {
+        val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
         val pipelineId =
             if (pipelineIdFlag.matches(DIGITS_PATTERN)) {
                 pipelineIdFlag
             } else {
-                getPipelineByUniqueName(pipelineIdFlag).id.toString()
+                getPipelineByUniqueName(repository, pipelineIdFlag).id.toString()
             }
 
-        val pipelineRuns = gitProvider.getPipelineRuns(pipelineId, retContext.gitRepository)
+        val pipelineRuns = gitProvider.getPipelineRuns(pipelineId, repository)
 
         outputHandler.listPipelineRuns(
             pipelineRuns.filter { it.matches(word) }
@@ -88,8 +92,7 @@ class AutoCompleteCommand(
         @Option(names = ["--word", "-w"]) word: String?,
         @Option(names = ["--repository", "-r"]) repositoryFlag: String?,
     ) {
-        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
-        val repository = if (repositoryFlag.isNullOrBlank()) repositoryInContext else repositoryFlag
+        val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
 
         repository?.let { repo ->
             outputHandler.listBranches(
@@ -127,8 +130,7 @@ class AutoCompleteCommand(
     }
 
     private fun PullRequest.isFromRepository(filterRepository: String?): Boolean {
-        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
-        val filterWord = if (!filterRepository.isNullOrBlank()) filterRepository else repositoryInContext
+        val filterWord = ContextUtils.resolveRepository(contextAwareness, retContext, filterRepository)
 
         return filterWord.isNullOrBlank() || this.repository.name.equals(filterWord, true)
     }
@@ -143,9 +145,7 @@ class AutoCompleteCommand(
         word == null || intelliSearch.matches(word, id.toString()) || intelliSearch.matches(word, name) ||
             intelliSearch.matches(word, state.toString()) || intelliSearch.matches(word, result.toString())
 
-    // TODO - Provider repository through parameter
-    private fun getPipelineByUniqueName(pipelineIdFlag: String): Pipeline {
-        val repository = retContext.gitRepository
+    private fun getPipelineByUniqueName(repository: String?, pipelineIdFlag: String): Pipeline {
         val pipelineByRepositoryAndId = gitProvider.getAllPipelines(repository).firstOrNull { it.uniqueName == pipelineIdFlag }
         return requireNotNull(pipelineByRepositoryAndId) {
             "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineIdFlag' for repository: $repository"
