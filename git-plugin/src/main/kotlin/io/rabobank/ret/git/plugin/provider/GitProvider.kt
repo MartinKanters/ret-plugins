@@ -29,4 +29,6 @@ interface GitProvider {
     fun getPipelineRuns(pipelineId: String, repositoryName: String?): List<PipelineRun>
 
     val urlFactory: GitUrlFactory
+
+    val properties: GitProviderProperties
 }

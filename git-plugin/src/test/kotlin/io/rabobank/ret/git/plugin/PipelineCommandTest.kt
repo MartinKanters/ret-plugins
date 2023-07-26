@@ -3,6 +3,7 @@ package io.rabobank.ret.git.plugin
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.command.PipelineCommand
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
 import io.rabobank.ret.git.plugin.provider.GitUrlFactory
 import io.rabobank.ret.git.plugin.provider.Pipeline
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
@@ -99,6 +100,7 @@ internal class PipelineCommandTest {
                 Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
             ),
         )
+        whenever(gitProviderMock.properties).thenReturn(GitProviderProperties("test", false))
 
         commandLine.execute("open", pipelineId, "-ica")
 

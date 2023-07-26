@@ -10,7 +10,13 @@ class AzureDevopsProvider(
     private val pluginConfig: AzureDevopsPluginConfig,
     override val urlFactory: AzureDevopsUrlFactory,
 ) : GitProvider {
-    override fun getAllPullRequests() = azureDevopsClient.getAllPullRequests().value.toGenericDomain()
+
+    override val properties = GitProviderProperties(
+        providerName = "Azure Devops",
+        pipelinesTiedToRepository = false
+    )
+
+    override fun getAllPullRequests()= azureDevopsClient.getAllPullRequests().value.toGenericDomain()
 
     override fun getPullRequestsNotReviewedByUser() =
         getAllPullRequests().filterNot {
