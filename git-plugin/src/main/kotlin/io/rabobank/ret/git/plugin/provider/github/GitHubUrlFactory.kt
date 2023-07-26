@@ -15,15 +15,15 @@ class GitHubUrlFactory(private val pluginConfig: GitHubPluginConfig) : GitUrlFac
         .path(repositoryName)
         .buildToURL()
 
-    override fun pipelineRun(pipelineRunId: String): URL {
+    override fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL {
         TODO("Not yet implemented")
     }
 
-    override fun pipeline(pipelineId: String): URL {
+    override fun pipeline(repositoryName: String?, pipelineId: String): URL {
         TODO("Not yet implemented")
     }
 
-    override fun pipelineDashboard(): URL {
+    override fun pipelineDashboard(repositoryName: String?): URL {
         TODO("Not yet implemented")
     }
 

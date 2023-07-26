@@ -14,6 +14,9 @@ class GitHubProvider(
     private val pluginConfig: GitHubPluginConfig,
     override val urlFactory: GitUrlFactory
 ) : GitProvider {
+
+    override val properties = GitProviderProperties(providerName = "GitHub", pipelinesTiedToRepository = true)
+
     override fun getAllPullRequests(): List<PullRequest> {
         return gitHubClient.searchIssuesForPullRequests("org:${pluginConfig.organization} is:pull-request state:open").items.toGenericDomain()
     }
@@ -23,7 +26,7 @@ class GitHubProvider(
         TODO("Not yet implemented")
     }
 
-    override fun getPullRequestById(id: String): PullRequest {
+    override fun getPullRequestById(repositoryName: String, id: String): PullRequest {
         // TODO - the repository name is needed here, as PR numbers/IDs are not unique in the whole organization
         TODO("Not yet implemented")
     }
@@ -45,11 +48,11 @@ class GitHubProvider(
         // TODO implement filter
     }
 
-    override fun getAllPipelines(): List<Pipeline> {
+    override fun getAllPipelines(repositoryName: String?): List<Pipeline> {
         TODO("Not yet implemented")
     }
 
-    override fun getPipelineRuns(pipelineId: String): List<PipelineRun> {
+    override fun getPipelineRuns(pipelineId: String, repositoryName: String?): List<PipelineRun> {
         TODO("Not yet implemented")
     }
 }

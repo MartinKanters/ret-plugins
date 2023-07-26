@@ -20,7 +20,7 @@ data class Repository(
 data class Branch(
     @JsonProperty("name") val name: String
 ) : GitDomainConvertible<GenericBranch> {
-    override fun toGenericDomain(): Branch = GenericBranch(name)
+    override fun toGenericDomain(): Branch = GenericBranch(name = name, shortName = name)
 }
 
 data class PullRequestReference(
