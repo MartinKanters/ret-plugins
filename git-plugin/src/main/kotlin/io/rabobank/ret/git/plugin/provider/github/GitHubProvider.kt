@@ -31,7 +31,7 @@ class GitHubProvider(
         TODO("Not yet implemented")
     }
 
-    override fun createPullRequest(repository: String, sourceRefName: String, targetRefName: String, title: String, description: String): PullRequestCreated {
+    override fun createPullRequest(repositoryName: String, sourceRefName: String, targetRefName: String, title: String, description: String): PullRequestCreated {
         TODO("Not yet implemented")
     }
 
@@ -39,12 +39,12 @@ class GitHubProvider(
         return gitHubClient.getRepositories(pluginConfig.organization).toGenericDomain()
     }
 
-    override fun getRepositoryById(repository: String): Repository {
-        return gitHubClient.getRepository(pluginConfig.organization, repository).toGenericDomain()
+    override fun getRepositoryById(repositoryName: String): Repository {
+        return gitHubClient.getRepository(pluginConfig.organization, repositoryName).toGenericDomain()
     }
 
-    override fun getAllRefs(repository: String, filter: String): List<Branch> {
-        return gitHubClient.getBranches(pluginConfig.organization, repository).toGenericDomain()
+    override fun getAllRefs(repositoryName: String, filter: String): List<Branch> {
+        return gitHubClient.getBranches(pluginConfig.organization, repositoryName).toGenericDomain()
         // TODO implement filter
     }
 
