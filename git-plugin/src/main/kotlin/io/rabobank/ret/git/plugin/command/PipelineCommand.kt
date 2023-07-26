@@ -36,8 +36,9 @@ class PipelineCommand(
         ) pipelineRunId: String?,
     ) {
         val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
-
-        // TODO if repo == null, check whether the GitProvider supports pipelines
+        require(repositoryInContext != null || !gitProvider.properties.pipelinesTiedToRepository) {
+            "A repository has to be provided to open a pipeline for it for Git provider '${gitProvider.properties.providerName}'"
+        }
 
         val url = if (pipelineId == null) gitProvider.urlFactory.pipelineDashboard(repositoryInContext)
         else if (pipelineRunId == null) {
