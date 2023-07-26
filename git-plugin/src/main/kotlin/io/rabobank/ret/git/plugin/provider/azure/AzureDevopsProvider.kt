@@ -26,14 +26,14 @@ class AzureDevopsProvider(
     override fun getPullRequestById(repositoryName: String, id: String) = azureDevopsClient.getPullRequestById(id).toGenericDomain()
 
     override fun createPullRequest(
-        repository: String,
+        repositoryName: String,
         sourceRefName: String,
         targetRefName: String,
         title: String,
         description: String,
     ): PullRequestCreated {
         val creationDTO = CreatePullRequest(sourceRefName, targetRefName, title, description)
-        return azureDevopsClient.createPullRequest(repository, API_VERSION, creationDTO).toGenericDomain()
+        return azureDevopsClient.createPullRequest(repositoryName, API_VERSION, creationDTO).toGenericDomain()
     }
 
     override fun getAllRepositories() = azureDevopsClient.getAllRepositories().value.toGenericDomain()
