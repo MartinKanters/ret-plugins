@@ -3,6 +3,7 @@ package io.rabobank.ret.git.plugin.command
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
 import org.jboss.resteasy.reactive.ClientWebApplicationException
@@ -52,7 +53,7 @@ class PullRequestCreateCommand(
     var filterRepository: String? = null
 
     override fun run() {
-        val repositoryName = requireNotNull(filterRepository ?: retContext.gitRepository) {
+        val repositoryName = requireNotNull(ContextUtils.resolveRepository(contextAwareness, retContext, filterRepository)) {
             "Could not determine repository from context. Please provide the repository."
         }
         val contextBranch = retContext.gitBranch

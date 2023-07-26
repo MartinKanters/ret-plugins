@@ -35,7 +35,9 @@ function _autocomplete_repository_flag() {
 function _autocomplete_pipeline() {
     local word=${(Q)words[$CURRENT]} # (Q) unescapes things like \(, \) etc
     if _matches_flag_syntax "$word"; then return; fi
-    desc=("${(@f)$(RET_ENV=ZSH_AUTOCOMPLETE ret git autocomplete git-pipeline --word="${word}")}")
+    _contains_any_flag '-ica' '--ignore-context-aware' && local ignore_context_aware_flag='-ica'
+    local repository_flag_value=${RET_COMBINED_OPT_ARGS[-r]-${RET_COMBINED_OPT_ARGS[--repository]}}
+    desc=("${(@f)$(RET_ENV=ZSH_AUTOCOMPLETE ret git autocomplete git-pipeline --word="${word}" --repository="${repository_flag_value}" ${ignore_context_aware_flag})}")
     vals=( ${desc%%:*} )
     compadd -V "no-sort-group" -d desc -aU vals # not sure why "-o nosort" does not work and why -V is...
     compstate[list_max]="300"
@@ -46,7 +48,9 @@ function _autocomplete_pipeline_run() {
     local word=${words[$CURRENT]}
     local pipeline_id=${(Q)words[$CURRENT-1]} # (Q) unescapes things like \(, \) etc
     if _matches_flag_syntax "$word"; then return; fi
-    desc=("${(@f)$(RET_ENV=ZSH_AUTOCOMPLETE ret git autocomplete git-pipeline-run --pipeline-id="${pipeline_id}" --word="$word")}")
+    _contains_any_flag '-ica' '--ignore-context-aware' && local ignore_context_aware_flag='-ica'
+    local repository_flag_value=${RET_COMBINED_OPT_ARGS[-r]-${RET_COMBINED_OPT_ARGS[--repository]}}
+    desc=("${(@f)$(RET_ENV=ZSH_AUTOCOMPLETE ret git autocomplete git-pipeline-run --pipeline-id="${pipeline_id}" --word="$word" --repository="${repository_flag_value}" ${ignore_context_aware_flag})}")
     vals=( ${desc%%:*} )
     compadd -V "no-sort-group" -d desc -aQU vals # not sure why "-o nosort" does not work and why -V is...
     compstate[insert]=menu # no expand

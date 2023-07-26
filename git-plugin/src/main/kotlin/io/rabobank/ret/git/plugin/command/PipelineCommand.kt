@@ -2,6 +2,7 @@ package io.rabobank.ret.git.plugin.command
 
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
 import io.rabobank.ret.util.RegexUtils.DIGITS_PATTERN
@@ -34,21 +35,27 @@ class PipelineCommand(
             paramLabel = "<pipeline_run_id>",
             completionCandidates = PipelineRunCompletionCandidates::class,
         ) pipelineRunId: String?,
+        @Option(
+            names = ["--repository", "-r"],
+            description = ["Filter on repository"],
+            scope = ScopeType.INHERIT,
+            completionCandidates = RepositoryFlagCompletionCandidates::class,
+        ) repositoryFlag: String?
     ) {
-        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
-        require(repositoryInContext != null || !gitProvider.properties.pipelinesTiedToRepository) {
+        val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
+        require(repository != null || !gitProvider.properties.pipelinesTiedToRepository) {
             "A repository has to be provided to open a pipeline for it for Git provider '${gitProvider.properties.providerName}'"
         }
 
-        val url = if (pipelineId == null) gitProvider.urlFactory.pipelineDashboard(repositoryInContext)
+        val url = if (pipelineId == null) gitProvider.urlFactory.pipelineDashboard(repository)
         else if (pipelineRunId == null) {
             val resolvedPipelineId = if (pipelineId.matches(DIGITS_PATTERN)) {
                 pipelineId
             } else {
-                getPipelineByUniqueName(repositoryInContext, pipelineId).id.toString()
+                getPipelineByUniqueName(repository, pipelineId).id.toString()
             }
-            gitProvider.urlFactory.pipeline(repositoryInContext, resolvedPipelineId)
-        } else gitProvider.urlFactory.pipelineRun(repositoryInContext, pipelineRunId)
+            gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
+        } else gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
 
         browserUtils.openUrl(url)
     }

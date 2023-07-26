@@ -73,6 +73,23 @@ internal class PipelineCommandTest {
     }
 
     @Test
+    fun `should open browser for correct pipeline by folder and name, prioritizing repository from flag`() {
+        val pipelineId = "folder\\pipeline_name"
+        val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
+        whenever(gitProviderMock.getAllPipelines("repo-from-flag")).thenReturn(
+            listOf(
+                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
+                Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
+            ),
+        )
+
+        commandLine.execute("open", pipelineId, "-r", "repo-from-flag")
+
+        verify(browserUtilsMock).openUrl(expectedPipelineRunURL)
+    }
+
+    @Test
     fun `should not open browser for pipeline by folder and name when name is incorrect`() {
         val pipelineId = "folder/pipeline_name2"
         whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
