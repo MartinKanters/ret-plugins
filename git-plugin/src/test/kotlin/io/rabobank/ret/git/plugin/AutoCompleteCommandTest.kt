@@ -289,7 +289,8 @@ class AutoCompleteCommandTest {
 
     @Test
     fun `should autocomplete pipelines (name, folder) on word`() {
-        whenever(gitProvider.getAllPipelines()).thenReturn(
+        whenever(mockedRetContext.gitRepository).thenReturn("repo")
+        whenever(gitProvider.getAllPipelines("repo")).thenReturn(
             listOf(
                 Pipeline(1, "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
                 Pipeline(2, "blabla", "admin-service", "admin-service\\blabla"),
@@ -313,8 +314,23 @@ class AutoCompleteCommandTest {
     }
 
     @Test
+    fun `should autocomplete pipelines (name, folder) on word and ignoring context`() {
+        whenever(mockedRetContext.gitRepository).thenReturn("repo")
+        whenever(gitProvider.getAllPipelines(null)).thenReturn(
+            listOf(
+                Pipeline(1, "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
+            ),
+        )
+
+        val exitCode = commandLine.execute("git-pipeline", "-w", "as", "-ica")
+        assertThat(exitCode).isEqualTo(0)
+
+        verify(gitProvider).getAllPipelines(null)
+    }
+
+    @Test
     fun `should autocomplete pipelines on folder and unique name`() {
-        whenever(gitProvider.getAllPipelines()).thenReturn(
+        whenever(gitProvider.getAllPipelines(null)).thenReturn(
             listOf(
                 Pipeline(1, "blabla", "admin-service", "admin-service\\blabla"),
             ),
@@ -337,7 +353,7 @@ class AutoCompleteCommandTest {
         expectedOutcome: List<PipelineRun>,
     ) {
         val pipelineId = "123456"
-        whenever(gitProvider.getPipelineRuns(pipelineId)).thenReturn(
+        whenever(gitProvider.getPipelineRuns(pipelineId, null)).thenReturn(
             listOf(
                 PipelineRun(123, "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
                 PipelineRun(
@@ -373,12 +389,12 @@ class AutoCompleteCommandTest {
             PipelineRunState.COMPLETED,
             PipelineRunResult.CANCELED,
         )
-        whenever(gitProvider.getAllPipelines()).thenReturn(
+        whenever(gitProvider.getAllPipelines(null)).thenReturn(
             listOf(
                 pipeline,
             ),
         )
-        whenever(gitProvider.getPipelineRuns(pipeline.id.toString()))
+        whenever(gitProvider.getPipelineRuns(pipeline.id.toString(), null))
             .thenReturn(listOf(expectedResponse))
 
         val exitCode = commandLine.execute("git-pipeline-run", "--pipeline-id", "folder\\pipeline_name")

@@ -24,7 +24,7 @@ class AzureDevopsProvider(
         }
     }
 
-    override fun getPullRequestById(id: String): PullRequest {
+    override fun getPullRequestById(repository: String, id: String): PullRequest {
         return azureDevopsClient.getPullRequestById(id).toGenericDomain()
     }
 
@@ -51,11 +51,11 @@ class AzureDevopsProvider(
         return azureDevopsClient.getAllRefs(repository, filter).value.toGenericDomain()
     }
 
-    override fun getAllPipelines(): List<Pipeline> {
+    override fun getAllPipelines(repository: String?): List<Pipeline> {
         return azureDevopsClient.getAllPipelines().value.toGenericDomain()
     }
 
-    override fun getPipelineRuns(pipelineId: String): List<PipelineRun> {
+    override fun getPipelineRuns(pipelineId: String, repository: String?): List<PipelineRun> {
         return azureDevopsClient.getPipelineRuns(pipelineId).value.toGenericDomain()
     }
 

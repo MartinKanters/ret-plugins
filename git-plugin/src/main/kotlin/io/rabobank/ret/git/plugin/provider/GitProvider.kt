@@ -5,7 +5,7 @@ interface GitProvider {
 
     fun getPullRequestsNotReviewedByUser(): List<PullRequest>
 
-    fun getPullRequestById(id: String): PullRequest
+    fun getPullRequestById(repository: String, id: String): PullRequest
 
     fun createPullRequest(
         repository: String,
@@ -13,7 +13,7 @@ interface GitProvider {
         targetRefName: String,
         title: String,
         description: String,
-    ): PullRequestCreated
+    ): PullRequestCreated // TODO: Verify whether this is implementable in GitHub
 
     fun getAllRepositories(): List<Repository>
 
@@ -21,9 +21,9 @@ interface GitProvider {
 
     fun getAllRefs(repository: String, filter: String): List<Branch>
 
-    fun getAllPipelines(): List<Pipeline>
+    fun getAllPipelines(repository: String?): List<Pipeline>
 
-    fun getPipelineRuns(pipelineId: String): List<PipelineRun>
+    fun getPipelineRuns(pipelineId: String, repository: String?): List<PipelineRun>
 
     val urlFactory: GitUrlFactory
 }

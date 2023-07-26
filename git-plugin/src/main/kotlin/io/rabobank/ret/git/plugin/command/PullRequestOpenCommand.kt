@@ -1,6 +1,7 @@
 package io.rabobank.ret.git.plugin.command
 
 import io.quarkus.logging.Log
+import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.GitProvider
 import io.rabobank.ret.picocli.mixin.ContextAwareness
@@ -21,10 +22,11 @@ class PullRequestOpenCommand(
     private val gitProvider: GitProvider,
     private val browserUtils: BrowserUtils,
     private val outputHandler: OutputHandler,
+    private val retContext: RetContext
 ) : Runnable {
 
     @Mixin
-    lateinit var contextAwareness: ContextAwareness // This is just needed for autocompletion.
+    lateinit var contextAwareness: ContextAwareness
 
     @Option(
         names = ["--repository", "-r"],
@@ -32,8 +34,7 @@ class PullRequestOpenCommand(
         scope = ScopeType.INHERIT,
         completionCandidates = RepositoryFlagCompletionCandidates::class,
     )
-    var filterRepository: String? =
-        null // This is just needed for autocompletion. It allows to autocomplete PRs based on repository (ret pr open -r=rt <TAB>)
+    var filterRepository: String? = null
 
     @Parameters(
         arity = "1",
@@ -43,8 +44,11 @@ class PullRequestOpenCommand(
     var pullRequestId: String = ""
 
     override fun run() {
+        val repositoryInContext = filterRepository ?: if (!contextAwareness.ignoreContextAwareness) retContext.gitRepository else null
+        requireNotNull(repositoryInContext) { "Opening PR for id: '$pullRequestId' is impossible, because there is no repository known" }
+
         try {
-            val pullRequest = gitProvider.getPullRequestById(pullRequestId)
+            val pullRequest = gitProvider.getPullRequestById(repositoryInContext, pullRequestId)
             val prURL = gitProvider.urlFactory.pullRequest(pullRequest.repository.name, pullRequest.id)
 
             browserUtils.openUrl(prURL)

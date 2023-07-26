@@ -28,9 +28,11 @@ class AutoCompleteCommand(
     @Mixin
     lateinit var contextAwareness: ContextAwareness
 
+    // TODO - Add repository as flag
     @Command(name = "git-pipeline")
     fun printPipelines(@Option(names = ["--word", "-w"]) word: String?) {
-        val pipelines = gitProvider.getAllPipelines()
+        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
+        val pipelines = gitProvider.getAllPipelines(repositoryInContext)
 
         outputHandler.listPipelines(
             pipelines.filter { it.matches(word) }
@@ -38,6 +40,7 @@ class AutoCompleteCommand(
         )
     }
 
+    // TODO - Add repository as flag
     @Command(name = "git-pipeline-run")
     fun printPipelineRuns(
         @Option(names = ["--word", "-w"]) word: String?,
@@ -53,7 +56,7 @@ class AutoCompleteCommand(
             getPipelineByUniqueName(pipelineIdFlag).id.toString()
         }
 
-        val pipelineRuns = gitProvider.getPipelineRuns(pipelineId)
+        val pipelineRuns = gitProvider.getPipelineRuns(pipelineId, retContext.gitRepository)
 
         outputHandler.listPipelineRuns(
             pipelineRuns.filter { it.matches(word) }
@@ -132,8 +135,12 @@ class AutoCompleteCommand(
         word == null || intelliSearch.matches(word, id.toString()) || intelliSearch.matches(word, name) ||
             intelliSearch.matches(word, state.toString()) || intelliSearch.matches(word, result.toString())
 
-    private fun getPipelineByUniqueName(pipelineIdFlag: String) =
-        requireNotNull(gitProvider.getAllPipelines().firstOrNull { it.uniqueName == pipelineIdFlag }) {
-            "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineIdFlag'"
+    // TODO - Provider repository through parameter
+    private fun getPipelineByUniqueName(pipelineIdFlag: String): Pipeline {
+        val repository = retContext.gitRepository
+        val pipelineByRepositoryAndId = gitProvider.getAllPipelines(repository).firstOrNull { it.uniqueName == pipelineIdFlag }
+        return requireNotNull(pipelineByRepositoryAndId) {
+            "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineIdFlag' for repository: $repository"
         }
+    }
 }

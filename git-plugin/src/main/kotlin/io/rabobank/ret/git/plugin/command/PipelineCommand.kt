@@ -1,10 +1,11 @@
 package io.rabobank.ret.git.plugin.command
 
+import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
 import io.rabobank.ret.util.RegexUtils.DIGITS_PATTERN
-import picocli.CommandLine.Command
-import picocli.CommandLine.Parameters
+import picocli.CommandLine.*
 
 @Command(
     name = "pipeline",
@@ -13,7 +14,11 @@ import picocli.CommandLine.Parameters
 class PipelineCommand(
     private val browserUtils: BrowserUtils,
     private val gitProvider: GitProvider,
+    private val retContext: RetContext,
 ) {
+
+    @Mixin
+    lateinit var contextAwareness: ContextAwareness
 
     @Command(name = "open", description = ["Open the pipeline dashboard, or a specific pipeline or run"])
     fun openPipelineInBrowser(
@@ -30,21 +35,25 @@ class PipelineCommand(
             completionCandidates = PipelineRunCompletionCandidates::class,
         ) pipelineRunId: String?,
     ) {
-        val url = if (pipelineId == null) gitProvider.urlFactory.pipelineDashboard()
+        val repositoryInContext = if (contextAwareness.ignoreContextAwareness) null else retContext.gitRepository
+
+        // TODO if repo == null, check whether the GitProvider supports pipelines
+
+        val url = if (pipelineId == null) gitProvider.urlFactory.pipelineDashboard(repositoryInContext)
         else if (pipelineRunId == null) {
             val resolvedPipelineId = if (pipelineId.matches(DIGITS_PATTERN)) {
                 pipelineId
             } else {
-                getPipelineByUniqueName(pipelineId).id.toString()
+                getPipelineByUniqueName(repositoryInContext, pipelineId).id.toString()
             }
-            gitProvider.urlFactory.pipeline(resolvedPipelineId)
-        } else gitProvider.urlFactory.pipelineRun(pipelineRunId)
+            gitProvider.urlFactory.pipeline(repositoryInContext, resolvedPipelineId)
+        } else gitProvider.urlFactory.pipelineRun(repositoryInContext, pipelineRunId)
 
         browserUtils.openUrl(url)
     }
 
-    private fun getPipelineByUniqueName(pipelineId: String?) =
-        requireNotNull(gitProvider.getAllPipelines().firstOrNull { it.uniqueName == pipelineId }) {
+    private fun getPipelineByUniqueName(repositoryName: String?, pipelineId: String?) =
+        requireNotNull(gitProvider.getAllPipelines(repositoryName).firstOrNull { it.uniqueName == pipelineId }) {
             "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineId'"
         }
 }
