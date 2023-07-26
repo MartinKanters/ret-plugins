@@ -1,6 +1,7 @@
 package io.rabobank.ret.git.plugin.command
 
 import io.quarkus.logging.Log
+import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.GitProvider
 import io.rabobank.ret.picocli.mixin.ContextAwareness
@@ -23,6 +24,7 @@ class PullRequestOpenCommand(
     private val gitProvider: GitProvider,
     private val browserUtils: BrowserUtils,
     private val outputHandler: OutputHandler,
+    private val retContext: RetContext
 ) : Runnable {
     @Mixin
     lateinit var contextAwareness: ContextAwareness
@@ -43,8 +45,11 @@ class PullRequestOpenCommand(
     var pullRequestId: String = ""
 
     override fun run() {
+        val repositoryInContext = filterRepository ?: if (!contextAwareness.ignoreContextAwareness) retContext.gitRepository else null
+        requireNotNull(repositoryInContext) { "Opening PR for id: '$pullRequestId' is impossible, because there is no repository known" }
+
         try {
-            val pullRequest = gitProvider.getPullRequestById(pullRequestId)
+            val pullRequest = gitProvider.getPullRequestById(repositoryInContext, pullRequestId)
             val prURL = gitProvider.urlFactory.pullRequest(pullRequest.repository.name, pullRequest.id)
 
             browserUtils.openUrl(prURL)

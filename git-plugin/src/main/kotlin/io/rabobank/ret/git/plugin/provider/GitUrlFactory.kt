@@ -5,11 +5,11 @@ import java.net.URL
 interface GitUrlFactory {
     fun repository(repositoryName: String): URL
 
-    fun pipelineRun(pipelineRunId: String): URL
+    fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL
 
-    fun pipeline(pipelineId: String): URL
+    fun pipeline(repository: String?, pipelineId: String): URL
 
-    fun pipelineDashboard(): URL
+    fun pipelineDashboard(repository: String?): URL
 
     fun pullRequest(
         repositoryName: String,

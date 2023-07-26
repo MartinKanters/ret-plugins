@@ -17,20 +17,20 @@ class AzureDevopsUrlFactory(
             .path(repositoryName)
             .buildToURL()
 
-    override fun pipelineRun(pipelineRunId: String): URL =
+    override fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL =
         azdoBaseUriBuilder()
             .path("_build")
             .path("results")
             .queryParam("buildId", pipelineRunId)
             .buildToURL()
 
-    override fun pipeline(pipelineId: String): URL =
+    override fun pipeline(repository: String?, pipelineId: String): URL =
         azdoBaseUriBuilder()
             .path("_build")
             .queryParam("definitionId", pipelineId)
             .buildToURL()
 
-    override fun pipelineDashboard(): URL =
+    override fun pipelineDashboard(repository: String?): URL =
         azdoBaseUriBuilder()
             .path("_build")
             .buildToURL()

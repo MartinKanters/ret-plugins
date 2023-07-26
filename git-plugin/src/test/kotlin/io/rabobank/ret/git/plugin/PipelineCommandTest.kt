@@ -1,5 +1,6 @@
 package io.rabobank.ret.git.plugin
 
+import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.command.PipelineCommand
 import io.rabobank.ret.git.plugin.provider.GitProvider
 import io.rabobank.ret.git.plugin.provider.GitUrlFactory
@@ -17,20 +18,24 @@ import picocli.CommandLine
 import java.net.URI
 import java.net.URL
 
+private const val repositoryFromContext = "REPO_FROM_CONTEXT"
+
 internal class PipelineCommandTest {
     private val browserUtilsMock = mock<BrowserUtils>()
     private val gitProviderMock = mock<GitProvider>()
+    private val retContext = mock<RetContext>()
     private lateinit var gitUrlFactory: GitUrlFactory
     private lateinit var commandLine: CommandLine
 
     @BeforeEach
     fun before() {
         gitUrlFactory = TestUrlFactory("https://test.git")
-        val command = PipelineCommand(browserUtilsMock, gitProviderMock)
+        val command = PipelineCommand(browserUtilsMock, gitProviderMock, retContext)
 
         commandLine = CommandLine(command)
 
         whenever(gitProviderMock.urlFactory).thenReturn(gitUrlFactory)
+        whenever(retContext.gitRepository).thenReturn(repositoryFromContext)
     }
 
     @Test
@@ -56,7 +61,7 @@ internal class PipelineCommandTest {
     fun `should open browser for correct pipeline by folder and name`() {
         val pipelineId = "folder\\pipeline_name"
         val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
-        whenever(gitProviderMock.getAllPipelines()).thenReturn(
+        whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
             listOf(
                 Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
                 Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
@@ -72,13 +77,44 @@ internal class PipelineCommandTest {
     @Test
     fun `should not open browser for pipeline by folder and name when name is incorrect`() {
         val pipelineId = "folder/pipeline_name2"
-        whenever(gitProviderMock.getAllPipelines()).thenReturn(
+        whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
             listOf(
                 Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
             ),
         )
 
         commandLine.execute("open", pipelineId)
+
+        verify(browserUtilsMock, never()).openUrl(any<URL>())
+    }
+
+    @Test
+    fun `should open browser for correct pipeline by folder and name, ignoring context`() {
+        val pipelineId = "folder\\pipeline_name"
+        val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
+        whenever(gitProviderMock.getAllPipelines(null)).thenReturn(
+            listOf(
+                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
+                Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
+            ),
+        )
+
+        commandLine.execute("open", pipelineId, "-ica")
+
+        verify(browserUtilsMock).openUrl(expectedPipelineRunURL)
+    }
+
+    @Test
+    fun `should not open browser for pipeline by folder and name when name is incorrect, ignoring context`() {
+        val pipelineId = "folder/pipeline_name2"
+        whenever(gitProviderMock.getAllPipelines(null)).thenReturn(
+            listOf(
+                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
+            ),
+        )
+
+        commandLine.execute("open", pipelineId, "-ica")
 
         verify(browserUtilsMock, never()).openUrl(any<URL>())
     }
