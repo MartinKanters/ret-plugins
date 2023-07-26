@@ -24,7 +24,7 @@ class AzureDevopsProvider(
         }
     }
 
-    override fun getPullRequestById(repository: String, id: String): PullRequest {
+    override fun getPullRequestById(repositoryName: String, id: String): PullRequest {
         return azureDevopsClient.getPullRequestById(id).toGenericDomain()
     }
 
@@ -43,19 +43,19 @@ class AzureDevopsProvider(
         return azureDevopsClient.getAllRepositories().value.toGenericDomain()
     }
 
-    override fun getRepositoryById(repository: String): Repository {
-        return azureDevopsClient.getRepositoryById(repository).toGenericDomain()
+    override fun getRepositoryById(repositoryName: String): Repository {
+        return azureDevopsClient.getRepositoryById(repositoryName).toGenericDomain()
     }
 
-    override fun getAllRefs(repository: String, filter: String): List<Branch> {
-        return azureDevopsClient.getAllRefs(repository, filter).value.toGenericDomain()
+    override fun getAllRefs(repositoryName: String, filter: String): List<Branch> {
+        return azureDevopsClient.getAllRefs(repositoryName, filter).value.toGenericDomain()
     }
 
-    override fun getAllPipelines(repository: String?): List<Pipeline> {
+    override fun getAllPipelines(repositoryName: String?): List<Pipeline> {
         return azureDevopsClient.getAllPipelines().value.toGenericDomain()
     }
 
-    override fun getPipelineRuns(pipelineId: String, repository: String?): List<PipelineRun> {
+    override fun getPipelineRuns(pipelineId: String, repositoryName: String?): List<PipelineRun> {
         return azureDevopsClient.getPipelineRuns(pipelineId).value.toGenericDomain()
     }
 
