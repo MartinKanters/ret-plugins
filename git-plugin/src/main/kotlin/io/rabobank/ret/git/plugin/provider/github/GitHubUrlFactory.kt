@@ -8,34 +8,47 @@ import java.net.URL
 private const val BASE_URI = "https://www.github.com"
 
 @ApplicationScoped
-class GitHubUrlFactory(private val pluginConfig: GitHubPluginConfig) : GitUrlFactory {
+class GitHubUrlFactory(pluginConfig: GitHubPluginConfig) : GitUrlFactory {
 
     override fun repository(repositoryName: String): URL = baseBuilder
-        .path(pluginConfig.organization)
         .path(repositoryName)
         .buildToURL()
 
     override fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL {
-        TODO("Not yet implemented")
+        check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
+        return baseBuilder
+            .path(repositoryName)
+            .path("actions")
+            .path("runs")
+            .path(pipelineRunId)
+            .buildToURL()
     }
 
     override fun pipeline(repositoryName: String?, pipelineId: String): URL {
-        TODO("Not yet implemented")
+        check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
+        return baseBuilder
+            .path(repositoryName)
+            .path("actions")
+            .path("workflows")
+            .path(pipelineId)
+            .buildToURL()
     }
 
     override fun pipelineDashboard(repositoryName: String?): URL {
-        TODO("Not yet implemented")
+        check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
+        return baseBuilder
+            .path(repositoryName)
+            .path("actions")
+            .buildToURL()
     }
 
     override fun pullRequest(repositoryName: String, pullRequestId: String): URL = baseBuilder
-        .path(pluginConfig.organization)
         .path(repositoryName)
         .path("pull")
         .path(pullRequestId)
         .buildToURL()
 
     override fun pullRequestCreate(repositoryName: String, sourceRef: String?): URL = baseBuilder
-        .path(pluginConfig.organization)
         .path(repositoryName)
         .path("compare")
         .also {
@@ -46,6 +59,7 @@ class GitHubUrlFactory(private val pluginConfig: GitHubPluginConfig) : GitUrlFac
         .buildToURL()
 
     private val baseBuilder = UriBuilder.fromUri(BASE_URI)
+        .path(pluginConfig.organization)
     
     private fun UriBuilder.buildToURL() = this.build().toURL()
 }
