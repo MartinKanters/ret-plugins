@@ -17,7 +17,7 @@ class AzureDevopsProvider(
             it.reviewers.any { reviewer -> reviewer.uniqueName.equals(pluginConfig.config.email, true) }
         }
 
-    override fun getPullRequestById(repository: String, id: String) = azureDevopsClient.getPullRequestById(id).toGenericDomain()
+    override fun getPullRequestById(repositoryName: String, id: String) = azureDevopsClient.getPullRequestById(id).toGenericDomain()
 
     override fun createPullRequest(
         repository: String,
@@ -32,16 +32,16 @@ class AzureDevopsProvider(
 
     override fun getAllRepositories() = azureDevopsClient.getAllRepositories().value.toGenericDomain()
 
-    override fun getRepositoryById(repository: String) =
-        azureDevopsClient.getRepositoryById(repository).toGenericDomain()
+    override fun getRepositoryById(repositoryName: String) =
+        azureDevopsClient.getRepositoryById(repositoryName).toGenericDomain()
 
     override fun getAllRefs(
-        repository: String,
+        repositoryName: String,
         filter: String,
-    ) = azureDevopsClient.getAllRefs(repository, filter).value.toGenericDomain()
+    ) = azureDevopsClient.getAllRefs(repositoryName, filter).value.toGenericDomain()
 
-    override fun getAllPipelines(repository: String?) = azureDevopsClient.getAllPipelines().value.toGenericDomain()
+    override fun getAllPipelines(repositoryName: String?) = azureDevopsClient.getAllPipelines().value.toGenericDomain()
 
-    override fun getPipelineRuns(pipelineId: String, repository: String?) =
+    override fun getPipelineRuns(pipelineId: String, repositoryName: String?) =
         azureDevopsClient.getPipelineRuns(pipelineId).value.toGenericDomain()
 }

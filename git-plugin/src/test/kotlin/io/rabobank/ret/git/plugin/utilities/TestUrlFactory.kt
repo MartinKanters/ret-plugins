@@ -9,9 +9,9 @@ class TestUrlFactory(private val domain: String) : GitUrlFactory {
 
     override fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL = "$domain/pipeline/run/$pipelineRunId".toURL()
 
-    override fun pipeline(repository: String?, pipelineId: String): URL = "$domain/pipeline/$pipelineId".toURL()
+    override fun pipeline(repositoryName: String?, pipelineId: String): URL = "$domain/pipeline/$pipelineId".toURL()
 
-    override fun pipelineDashboard(repository: String?): URL = "$domain/pipeline".toURL()
+    override fun pipelineDashboard(repositoryName: String?): URL = "$domain/pipeline".toURL()
 
     override fun pullRequest(
         repositoryName: String,
