@@ -46,5 +46,29 @@ interface GitHubClient {
     @ClientQueryParam(name = "per_page", value = ["100"]) // TODO 100 is the max, replace this later with pagination
     fun searchIssuesForPullRequests(@QueryParam("q") query: String): PullRequestReferences
 
+    @GET
+    @Path("repos/{org}/{repositoryName}/pulls/{number}")
+    @ClientHeaderParam(name = "X-GitHub-Api-Version", value = ["2022-11-28"])
+    fun getPullRequestByNumber(
+        @PathParam("org") organization: String,
+        @PathParam("repositoryName") repositoryName: String,
+        @PathParam("number") number: String
+    ): PullRequest
 
+    @GET
+    @Path("repos/{org}/{repositoryName}/actions/workflows")
+    @ClientHeaderParam(name = "X-GitHub-Api-Version", value = ["2022-11-28"])
+    fun getWorkflows(
+        @PathParam("org") organization: String,
+        @PathParam("repositoryName") repositoryName: String,
+    ): Workflows
+
+    @GET
+    @Path("repos/{org}/{repositoryName}/actions/workflows/{pipelineId}")
+    @ClientHeaderParam(name = "X-GitHub-Api-Version", value = ["2022-11-28"])
+    fun getWorkflowRuns(
+        @PathParam("org") organization: String,
+        @PathParam("repositoryName") repositoryName: String,
+        @PathParam("pipelineId") pipelineId: String,
+    ): WorkflowRuns
 }

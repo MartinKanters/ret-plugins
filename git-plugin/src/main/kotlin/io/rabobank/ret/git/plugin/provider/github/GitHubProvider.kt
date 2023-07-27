@@ -22,14 +22,13 @@ class GitHubProvider(
     }
 
     override fun getPullRequestsNotReviewedByUser(): List<PullRequest> {
-        // TODO we probably have to search all pull requests and then per PR find the reviewers in a specific call
-        TODO("Not yet implemented")
+        // GitHub does not offer a solution for finding this without doing N+1 searches (first finding all PRs, then per PR finding the reviewers)
+        throw IllegalStateException("Not implemented for the GitHub Git provider")
     }
 
-    override fun getPullRequestById(repositoryName: String, id: String): PullRequest {
-        // TODO - the repository name is needed here, as PR numbers/IDs are not unique in the whole organization
-        TODO("Not yet implemented")
-    }
+    override fun getPullRequestById(repositoryName: String, id: String) =
+        gitHubClient.getPullRequestByNumber(pluginConfig.organization, repositoryName, id).toGenericDomain()
+
 
     override fun createPullRequest(repositoryName: String, sourceRefName: String, targetRefName: String, title: String, description: String): PullRequestCreated {
         TODO("Not yet implemented")
@@ -49,10 +48,12 @@ class GitHubProvider(
     }
 
     override fun getAllPipelines(repositoryName: String?): List<Pipeline> {
-        TODO("Not yet implemented")
+        check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
+        return gitHubClient.getWorkflows(pluginConfig.organization, repositoryName).workflows.toGenericDomain() // TODO map items and apply container and uniqueName
     }
 
     override fun getPipelineRuns(pipelineId: String, repositoryName: String?): List<PipelineRun> {
-        TODO("Not yet implemented")
+        check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
+        return gitHubClient.getWorkflowRuns(pluginConfig.organization, repositoryName, pipelineId).workflowRuns.toGenericDomain()
     }
 }
