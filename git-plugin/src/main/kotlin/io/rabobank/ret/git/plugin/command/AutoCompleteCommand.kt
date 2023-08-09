@@ -62,7 +62,7 @@ class AutoCompleteCommand(
             if (pipelineIdFlag.matches(DIGITS_PATTERN)) {
                 pipelineIdFlag
             } else {
-                getPipelineByUniqueName(repository, pipelineIdFlag).id.toString()
+                getPipelineByUniqueName(repository, pipelineIdFlag).id
             }
 
         val pipelineRuns = gitProvider.getPipelineRuns(pipelineId, repository)
@@ -142,7 +142,7 @@ class AutoCompleteCommand(
             intelliSearch.matches(value, uniqueName)
 
     private fun PipelineRun.matches(word: String?) =
-        word == null || intelliSearch.matches(word, id.toString()) || intelliSearch.matches(word, name) ||
+        word == null || intelliSearch.matches(word, id) || intelliSearch.matches(word, name) ||
             intelliSearch.matches(word, state.toString()) || intelliSearch.matches(word, result.toString())
 
     private fun getPipelineByUniqueName(repository: String?, pipelineIdFlag: String): Pipeline {

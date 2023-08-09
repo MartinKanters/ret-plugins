@@ -57,7 +57,7 @@ class PipelineCommand(
                     if (pipelineId.matches(DIGITS_PATTERN)) {
                         pipelineId
                     } else {
-                        getPipelineByUniqueName(repository, pipelineId).id.toString()
+                        getPipelineByUniqueName(repository, pipelineId).id
                     }
                 gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
             } else {

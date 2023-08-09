@@ -407,7 +407,7 @@ class AutoCompleteCommandTest {
                 pipeline,
             ),
         )
-        whenever(gitProvider.getPipelineRuns(pipeline.id.toString(), null))
+        whenever(gitProvider.getPipelineRuns(pipeline.id, null))
             .thenReturn(listOf(expectedResponse))
 
         val exitCode = commandLine.execute("pipeline-run", "--pipeline-id", "folder\\pipeline_name")
