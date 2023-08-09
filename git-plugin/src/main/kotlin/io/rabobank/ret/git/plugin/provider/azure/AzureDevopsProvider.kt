@@ -41,10 +41,9 @@ class AzureDevopsProvider(
     override fun getRepositoryById(repositoryName: String) =
         azureDevopsClient.getRepositoryById(repositoryName).toGenericDomain()
 
-    override fun getAllRefs(
-        repositoryName: String,
-        filter: String,
-    ) = azureDevopsClient.getAllRefs(repositoryName, filter).value.toGenericDomain()
+    override fun getAllBranches(repositoryName: String): List<Branch> {
+        return azureDevopsClient.getAllRefs(repositoryName, "heads/").value.toGenericDomain()
+    }
 
     override fun getAllPipelines(repositoryName: String?) = azureDevopsClient.getAllPipelines().value.toGenericDomain()
 

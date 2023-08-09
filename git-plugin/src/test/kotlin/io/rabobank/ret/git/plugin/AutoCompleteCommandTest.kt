@@ -64,9 +64,8 @@ class AutoCompleteCommandTest {
             )
         whenever(gitProvider.getAllRepositories()).thenReturn(allMockedRepositories)
         whenever(
-            gitProvider.getAllRefs(
+            gitProvider.getAllBranches(
                 "admin-service",
-                "heads/",
             ),
         ).thenReturn(
             listOf(
@@ -219,9 +218,8 @@ class AutoCompleteCommandTest {
     @Test
     fun `should return no branches if repository does not exist`() {
         whenever(
-            gitProvider.getAllRefs(
+            gitProvider.getAllBranches(
                 "client-service-encryption",
-                "heads/",
             ),
         ).thenReturn(
             listOf(),
