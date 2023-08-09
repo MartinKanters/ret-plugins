@@ -65,8 +65,8 @@ data class Workflow(
         GenericPipeline(
             id = 0, // TODO - fill in with the `path` when the interface is changed (to string)
             name = name,
-            container = "", // will be populated in the Provider code
-            uniqueName = "" // will be populated in the Provider code
+            container = "", // TODO should be populated in the Provider code
+            uniqueName = "" // TODO should will be populated in the Provider code
         )
 
 }
