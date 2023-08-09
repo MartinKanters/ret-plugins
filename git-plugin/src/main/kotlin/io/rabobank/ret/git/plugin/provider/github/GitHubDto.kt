@@ -63,7 +63,7 @@ data class Workflow(
 ) : GitDomainConvertible<GenericPipeline> {
     override fun toGenericDomain() =
         GenericPipeline(
-            id = 0, // TODO - fill in with the `path` when the interface is changed (to string)
+            id = path,
             name = name,
             container = "", // TODO should be populated in the Provider code
             uniqueName = "" // TODO should will be populated in the Provider code
@@ -84,7 +84,7 @@ data class WorkflowRun(
 ) : GitDomainConvertible<GenericPipelineRun> {
     override fun toGenericDomain(): PipelineRun {
         return PipelineRun(
-            id = 0, // TODO - fill in when the interface is changed (to string)
+            id = id,
             name = name,
             createdDate = createdAt,
             state = when(status) {
