@@ -1,8 +1,10 @@
 package io.rabobank.ret.git.plugin.provider.github
 
 import io.quarkus.rest.client.reactive.ClientQueryParam
+import io.rabobank.ret.git.plugin.provider.PullRequestCreated
 import io.rabobank.ret.git.plugin.provider.utilities.LoggingFilter
 import jakarta.ws.rs.GET
+import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.QueryParam
@@ -71,4 +73,12 @@ interface GitHubClient {
         @PathParam("repositoryName") repositoryName: String,
         @PathParam("pipelineId") pipelineId: String,
     ): WorkflowRuns
+
+    @POST
+    @Path("repos/{org}/{repositoryName}/pulls")
+    @ClientHeaderParam(name = "X-GitHub-Api-Version", value = ["2022-11-28"])
+    fun createPullRequest(
+        @PathParam("repositoryName") repositoryName: String,
+        createPullRequest: CreatePullRequest
+    ): PullRequestCreated
 }

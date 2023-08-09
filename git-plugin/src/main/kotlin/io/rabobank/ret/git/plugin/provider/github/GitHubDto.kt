@@ -1,6 +1,7 @@
 package io.rabobank.ret.git.plugin.provider.github
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.quarkus.runtime.annotations.RegisterForReflection
 import io.rabobank.ret.git.plugin.provider.*
 import io.rabobank.ret.git.plugin.provider.Branch
 import io.rabobank.ret.git.plugin.provider.PipelineRun
@@ -11,6 +12,7 @@ import io.rabobank.ret.git.plugin.provider.Branch as GenericBranch
 import io.rabobank.ret.git.plugin.provider.Pipeline as GenericPipeline
 import io.rabobank.ret.git.plugin.provider.PipelineRun as GenericPipelineRun
 import io.rabobank.ret.git.plugin.provider.PullRequest as GenericPullRequest
+import io.rabobank.ret.git.plugin.provider.PullRequestCreated as GenericPullRequestCreated
 import io.rabobank.ret.git.plugin.provider.Repository as GenericRepository
 
 data class Repository(
@@ -129,3 +131,20 @@ data class WorkflowRun(
 data class WorkflowRuns(
     @JsonProperty("workflow_runs") val workflowRuns: List<WorkflowRun>
 )
+
+@RegisterForReflection
+data class CreatePullRequest(
+    @JsonProperty("head") val head: String,
+    @JsonProperty("base") val base: String,
+    @JsonProperty("title") val title: String,
+    @JsonProperty("body") val body: String,
+)
+
+data class PullRequestCreated(
+    @JsonProperty("number") val number: String
+) : GitDomainConvertible<GenericPullRequestCreated> {
+    override fun toGenericDomain() =
+        GenericPullRequestCreated(
+            pullRequestId = number
+        )
+}

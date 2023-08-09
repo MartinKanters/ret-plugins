@@ -13,7 +13,7 @@ interface GitProvider {
         targetRefName: String,
         title: String,
         description: String,
-    ): PullRequestCreated // TODO: Verify whether this is implementable in GitHub
+    ): PullRequestCreated
 
     fun getAllRepositories(): List<Repository>
 

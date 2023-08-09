@@ -30,9 +30,8 @@ class GitHubProvider(
         gitHubClient.getPullRequestByNumber(pluginConfig.organization, repositoryName, id).toGenericDomain()
 
 
-    override fun createPullRequest(repositoryName: String, sourceRefName: String, targetRefName: String, title: String, description: String): PullRequestCreated {
-        TODO("Not yet implemented")
-    }
+    override fun createPullRequest(repositoryName: String, sourceRefName: String, targetRefName: String, title: String, description: String) =
+        gitHubClient.createPullRequest(repositoryName, CreatePullRequest(sourceRefName, targetRefName, title, description))
 
     override fun getAllRepositories(): List<Repository> {
         return gitHubClient.getRepositories(pluginConfig.organization).toGenericDomain()
