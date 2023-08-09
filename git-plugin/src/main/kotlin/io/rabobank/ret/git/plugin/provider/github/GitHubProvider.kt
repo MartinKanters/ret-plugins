@@ -48,7 +48,8 @@ class GitHubProvider(
 
     override fun getAllPipelines(repositoryName: String?): List<Pipeline> {
         check(repositoryName != null) { "GitHub requires a repository for pipeline functionality" }
-        return gitHubClient.getWorkflows(pluginConfig.organization, repositoryName).workflows.toGenericDomain() // TODO map items and apply container and uniqueName
+        return gitHubClient.getWorkflows(pluginConfig.organization, repositoryName).workflows.toGenericDomain()
+            .map { it.copy(container = repositoryName, uniqueName = "$repositoryName:${it.id}") }
     }
 
     override fun getPipelineRuns(pipelineId: String, repositoryName: String?): List<PipelineRun> {
