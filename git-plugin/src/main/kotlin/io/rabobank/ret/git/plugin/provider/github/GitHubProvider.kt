@@ -42,9 +42,8 @@ class GitHubProvider(
         return gitHubClient.getRepository(pluginConfig.organization, repositoryName).toGenericDomain()
     }
 
-    override fun getAllRefs(repositoryName: String, filter: String): List<Branch> {
+    override fun getAllBranches(repositoryName: String): List<Branch> {
         return gitHubClient.getBranches(pluginConfig.organization, repositoryName).toGenericDomain()
-        // TODO implement filter
     }
 
     override fun getAllPipelines(repositoryName: String?): List<Pipeline> {
