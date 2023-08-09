@@ -24,7 +24,7 @@ data class Repository(
 data class Branch(
     @JsonProperty("name") val name: String
 ) : GitDomainConvertible<GenericBranch> {
-    override fun toGenericDomain(): Branch = GenericBranch(name = name, shortName = name)
+    override fun toGenericDomain(): Branch = GenericBranch(name)
 }
 
 data class PullRequest(
@@ -48,7 +48,8 @@ data class PullRequestReference(
     override fun toGenericDomain(): PullRequest = GenericPullRequest(
         number,
         title,
-        Repository(repositoryUrl.substringAfterLast("/"), null), // TODO - can we get the default-branch somehow?
+        Repository(repositoryUrl.substringAfterLast("/"), null), // The default branch is not available here,
+                                                                 //   if we want it we should do another call to get the repository in the provider code
         listOf()
     )
 }

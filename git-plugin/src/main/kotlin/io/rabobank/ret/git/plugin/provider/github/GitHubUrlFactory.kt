@@ -48,12 +48,12 @@ class GitHubUrlFactory(pluginConfig: GitHubPluginConfig) : GitUrlFactory {
         .path(pullRequestId)
         .buildToURL()
 
-    override fun pullRequestCreate(repositoryName: String, sourceRef: String?): URL = baseBuilder
+    override fun pullRequestCreate(repositoryName: String, targetRef: String, sourceRef: String?): URL = baseBuilder
         .path(repositoryName)
         .path("compare")
         .also {
             if (sourceRef != null) {
-                it.path("master...$sourceRef") // TODO - get master from default_branch
+                it.path("$targetRef...$sourceRef")
             }
         }
         .buildToURL()
