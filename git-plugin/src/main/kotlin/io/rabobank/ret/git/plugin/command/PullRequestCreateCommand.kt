@@ -61,8 +61,11 @@ class PullRequestCreateCommand(
         val contextBranch = retContext.gitBranch
         val sourceBranch = providedBranch ?: contextBranch
 
+        val repository = gitProvider.getRepositoryById(repositoryName)
+        val defaultBranch = requireNotNull(repository.defaultBranch) { "No default branch available." }
+
         if (!noPrompt) {
-            val branch =
+            val sourceBranchIfAvailable =
                 if (autofillBranchRequired(
                         filterRepository,
                         providedBranch,
@@ -74,12 +77,10 @@ class PullRequestCreateCommand(
                     null
                 }
 
-            val prCreateURL = gitProvider.urlFactory.pullRequestCreate(repositoryName, branch)
+            val prCreateURL = gitProvider.urlFactory.pullRequestCreate(repositoryName, defaultBranch, sourceBranchIfAvailable)
             browserUtils.openUrl(prCreateURL)
         } else {
             requireNotNull(sourceBranch) { "Could not determine branch from context. Please provide the branch." }
-            val repository = gitProvider.getRepositoryById(repositoryName)
-            val defaultBranch = requireNotNull(repository.defaultBranch) { "No default branch available." }
 
             require(defaultBranch != sourceBranch) {
                 "Could not create PR. Source branch is the same as the default branch."
@@ -89,7 +90,7 @@ class PullRequestCreateCommand(
                 val createPullRequestResponse =
                     gitProvider.createPullRequest(
                         repositoryName,
-                        "refs/heads/$sourceBranch",
+                        sourceBranch,
                         defaultBranch,
                         "Merge $sourceBranch into ${repository.defaultBranch}",
                         "PR created by RET using `ret pr create --no-prompt`.",

@@ -51,11 +51,11 @@ internal class RepositoryCommandTest {
 
         whenever(mockedGitProvider.getAllRepositories()).thenReturn(
             listOf(
-                Repository("client-service", "refs/heads/master"),
-                Repository("admin-service", "refs/heads/master"),
-                Repository("bto-apmd", "refs/heads/master"),
-                Repository("open-source-tool", "refs/heads/master"),
-                Repository("generic-project", "refs/heads/master"),
+                Repository("client-service", "master"),
+                Repository("admin-service", "master"),
+                Repository("bto-apmd", "master"),
+                Repository("open-source-tool", "master"),
+                Repository("generic-project", "master"),
             ),
         )
         whenever(mockedGitProvider.urlFactory).thenReturn(TestUrlFactory("https://test.git"))

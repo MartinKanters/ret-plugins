@@ -13,11 +13,7 @@ interface GitUrlFactory {
 
     fun pullRequest(
         repositoryName: String,
-        pullRequestId: String,
-    ): URL
-
-    fun pullRequestCreate(
-        repositoryName: String,
-        sourceRef: String?,
+        pullRequestId: String,): URL
+    fun pullRequestCreate(repositoryName: String, targetRef: String, sourceRef: String?,
     ): URL
 }

@@ -32,7 +32,7 @@ class AzureDevopsProvider(
         title: String,
         description: String,
     ): PullRequestCreated {
-        val creationDTO = CreatePullRequest(sourceRefName, targetRefName, title, description)
+        val creationDTO = CreatePullRequest("refs/heads/$sourceRefName", "refs/heads/$targetRefName", title, description)
         return azureDevopsClient.createPullRequest(repositoryName, API_VERSION, creationDTO).toGenericDomain()
     }
 

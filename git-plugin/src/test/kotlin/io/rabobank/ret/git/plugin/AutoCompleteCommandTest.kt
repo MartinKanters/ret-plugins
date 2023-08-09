@@ -57,10 +57,10 @@ class AutoCompleteCommandTest {
 
         allMockedRepositories =
             listOf(
-                Repository("admin-service", "refs/heads/master"),
-                Repository("client-service", "refs/heads/master"),
-                Repository("generic-project", "refs/heads/master"),
-                Repository("open-source-tool", "refs/heads/master"),
+                Repository("admin-service", "master"),
+                Repository("client-service", "master"),
+                Repository("generic-project", "master"),
+                Repository("open-source-tool", "master"),
             )
         whenever(gitProvider.getAllRepositories()).thenReturn(allMockedRepositories)
         whenever(
@@ -69,9 +69,9 @@ class AutoCompleteCommandTest {
             ),
         ).thenReturn(
             listOf(
-                Branch("refs/heads/feature/abc", "feature/abc"),
-                Branch("refs/heads/feature/ahum", "feature/ahum"),
-                Branch("refs/heads/feature/def", "feature/def"),
+                Branch("feature/abc"),
+                Branch("feature/ahum"),
+                Branch("feature/def"),
             ),
         )
         allMockedPullRequests =
@@ -79,21 +79,21 @@ class AutoCompleteCommandTest {
                 PullRequest(
                     "1234",
                     "PR Title",
-                    Repository("repo", "refs/heads/master"),
+                    Repository("repo", "master"),
                     listOf(Reviewer("manks@live.com")),
                 ),
                 PullRequest(
                     "1235",
                     "Add logo",
-                    Repository("generic-project", "refs/heads/master"),
+                    Repository("generic-project", "master"),
                     listOf(Reviewer("manks@live.com")),
                 ),
-                PullRequest("1241", "NOJIRA: ahum", Repository("ret-engineering-tools", "refs/heads/master"), listOf()),
+                PullRequest("1241", "NOJIRA: ahum", Repository("ret-engineering-tools", "master"), listOf()),
                 PullRequest(
                     "1271", "NOJIRA: MANKS",
-                    Repository("ret-engineering-tools", "refs/heads/master"), listOf(),
+                    Repository("ret-engineering-tools", "master"), listOf(),
                 ),
-                PullRequest("1272", "update admin-service", Repository("test", "refs/heads/master"), listOf()),
+                PullRequest("1272", "update admin-service", Repository("test", "master"), listOf()),
             )
         whenever(gitProvider.getAllPullRequests()).thenReturn(allMockedPullRequests)
         whenever(gitProvider.getPullRequestsNotReviewedByUser()).thenReturn(
@@ -135,7 +135,7 @@ class AutoCompleteCommandTest {
     fun `should return branches which match the word`() {
         verifyBranchesOutputted(
             commandLine.execute("branch", "--word=ahum", "--repository=admin-service"),
-            listOf("refs/heads/feature/ahum"),
+            listOf("feature/ahum"),
         )
     }
 
@@ -144,9 +144,9 @@ class AutoCompleteCommandTest {
         verifyBranchesOutputted(
             commandLine.execute("branch", "--repository=admin-service"),
             listOf(
-                "refs/heads/feature/abc",
-                "refs/heads/feature/ahum",
-                "refs/heads/feature/def",
+                "feature/abc",
+                "feature/ahum",
+                "feature/def",
             ),
         )
     }
@@ -156,9 +156,9 @@ class AutoCompleteCommandTest {
         verifyBranchesOutputted(
             commandLine.execute("branch", "--word=", "--repository=admin-service"),
             listOf(
-                "refs/heads/feature/abc",
-                "refs/heads/feature/ahum",
-                "refs/heads/feature/def",
+                "feature/abc",
+                "feature/ahum",
+                "feature/def",
             ),
         )
     }
@@ -168,9 +168,7 @@ class AutoCompleteCommandTest {
         branches: List<String>,
     ) {
         assertThat(exitCode).isEqualTo(0)
-        verify(outputHandler).listBranches(
-            branches.map { Branch(it, it.removePrefix("refs/heads/")) },
-        )
+        verify(outputHandler).listBranches(branches.map { Branch(it) })
     }
 
     @Test
@@ -192,7 +190,7 @@ class AutoCompleteCommandTest {
         verifyBranchesOutputted(
             commandLine.execute("branch", "--word=abc"),
             listOf(
-                "refs/heads/feature/abc",
+                "feature/abc",
             ),
         )
     }
@@ -203,7 +201,7 @@ class AutoCompleteCommandTest {
 
         verifyBranchesOutputted(
             commandLine.execute("branch", "--word=abc", "--repository="),
-            listOf("refs/heads/feature/abc"),
+            listOf("feature/abc"),
         )
     }
 
@@ -434,13 +432,13 @@ class AutoCompleteCommandTest {
         @JvmStatic
         fun repositoryTest() =
             listOf(
-                Arguments.of("as", listOf(Repository("admin-service", "refs/heads/master"))),
-                Arguments.of("admin-service", listOf(Repository("admin-service", "refs/heads/master"))),
+                Arguments.of("as", listOf(Repository("admin-service", "master"))),
+                Arguments.of("admin-service", listOf(Repository("admin-service", "master"))),
                 Arguments.of(
                     "service",
                     listOf(
-                        Repository("admin-service", "refs/heads/master"),
-                        Repository("client-service", "refs/heads/master"),
+                        Repository("admin-service", "master"),
+                        Repository("client-service", "master"),
                     ),
                 ),
             )

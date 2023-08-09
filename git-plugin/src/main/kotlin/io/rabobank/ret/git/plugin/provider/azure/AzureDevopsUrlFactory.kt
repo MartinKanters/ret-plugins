@@ -46,14 +46,13 @@ class AzureDevopsUrlFactory(
             .path(pullRequestId)
             .buildToURL()
 
-    override fun pullRequestCreate(
-        repositoryName: String,
-        sourceRef: String?,
+    override fun pullRequestCreate(repositoryName: String, targetRef: String, sourceRef: String?,
     ): URL =
         azdoBaseUriBuilder()
             .path("_git")
             .path(repositoryName)
             .path("pullrequestcreate")
+            .queryParam("targetRef", targetRef)
             .apply {
                 if (sourceRef != null) {
                     queryParam("sourceRef", sourceRef)

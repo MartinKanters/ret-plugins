@@ -29,6 +29,9 @@ import java.net.URI
 
 private const val BASE_URL = "https://test.git"
 
+private const val REPO = "generic-project"
+private const val DEFAULT_BRANCH = "defaultBranch"
+
 @QuarkusTest
 internal class PullRequestCreateCommandTest {
     private val gitProvider = mock<GitProvider>()
@@ -51,21 +54,20 @@ internal class PullRequestCreateCommandTest {
 
         commandLine = spy(CommandLine(command))
         commandLine.executionExceptionHandler = ExceptionMessageHandler(outputHandler)
+        whenever(gitProvider.getRepositoryById(REPO)).thenReturn(Repository(REPO, DEFAULT_BRANCH))
         whenever(gitProvider.urlFactory).thenReturn(TestUrlFactory("https://test.git"))
     }
 
     @Test
     fun `create should open web page to create pr in context aware case`() {
-        val repo = "generic-project"
-
-        whenever(mockedRetContext.gitRepository).thenReturn(repo)
+        whenever(mockedRetContext.gitRepository).thenReturn(REPO)
         whenever(mockedRetContext.gitBranch).thenReturn("feature/my-branch")
 
         val exitCode = commandLine.execute()
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL =
-            URI.create("$BASE_URL/pullrequest/create/$repo/feature/my-branch").toURL()
+            URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/feature/my-branch").toURL()
 
         verify(mockedBrowserUtils).openUrl(expectedURL)
     }
@@ -73,13 +75,11 @@ internal class PullRequestCreateCommandTest {
     @ParameterizedTest
     @ValueSource(strings = ["--repository", "-r"])
     fun `create should open web page to create pr when repo and branch are provided`(flag: String) {
-        val repo = "generic-project"
-
-        val exitCode = commandLine.execute(flag, repo, "feature/my-branch")
+        val exitCode = commandLine.execute(flag, REPO, "feature/my-branch")
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL =
-            URI.create("$BASE_URL/pullrequest/create/$repo/feature/my-branch").toURL()
+            URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/feature/my-branch").toURL()
 
         verify(mockedBrowserUtils).openUrl(expectedURL)
     }
@@ -89,12 +89,10 @@ internal class PullRequestCreateCommandTest {
     fun `create should open web page to create pr without selected branch, when repo provided and branch not`(
         flag: String,
     ) {
-        val repo = "generic-project"
-
-        val exitCode = commandLine.execute(flag, repo)
+        val exitCode = commandLine.execute(flag, REPO)
         assertThat(exitCode).isEqualTo(0)
 
-        val expectedURL = URI.create("$BASE_URL/pullrequest/create/$repo/").toURL()
+        val expectedURL = URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/").toURL()
 
         verify(mockedBrowserUtils).openUrl(expectedURL)
     }
@@ -104,29 +102,25 @@ internal class PullRequestCreateCommandTest {
     fun `create should open web page to create pr without selected branch, when repo provided and branch from context`(
         flag: String,
     ) {
-        val repo = "generic-project"
-
         whenever(mockedRetContext.gitBranch).thenReturn("feature/my-branch")
 
-        val exitCode = commandLine.execute(flag, repo)
+        val exitCode = commandLine.execute(flag, REPO)
         assertThat(exitCode).isEqualTo(0)
 
-        val expectedURL = URI.create("$BASE_URL/pullrequest/create/$repo/").toURL()
+        val expectedURL = URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/").toURL()
 
         verify(mockedBrowserUtils).openUrl(expectedURL)
     }
 
     @Test
     fun `create should open web page to create pr when branch provided, repo from context`() {
-        val repo = "generic-project"
-
-        whenever(mockedRetContext.gitRepository).thenReturn(repo)
+        whenever(mockedRetContext.gitRepository).thenReturn(REPO)
 
         val exitCode = commandLine.execute("feature/my-branch")
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL =
-            URI.create("$BASE_URL/pullrequest/create/$repo/feature/my-branch").toURL()
+            URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/feature/my-branch").toURL()
 
         verify(mockedBrowserUtils).openUrl(expectedURL)
     }
@@ -144,60 +138,48 @@ internal class PullRequestCreateCommandTest {
     @Test
     fun `create should return a URL to the created PR with --no-prompt`() {
         val branch = "feature/my-branch"
-        val repo = "generic-project"
-        val defaultBranch = "defaultBranch"
         val createdPullRequestId = "123456"
 
-        whenever(gitProvider.getRepositoryById(repo)).thenReturn(Repository(repo, defaultBranch))
+        whenever(gitProvider.getRepositoryById(REPO)).thenReturn(Repository(REPO, DEFAULT_BRANCH))
         whenever(
             gitProvider.createPullRequest(
-                repo,
-                "refs/heads/$branch",
-                defaultBranch,
-                "Merge $branch into $defaultBranch",
+                REPO,
+                branch,
+                DEFAULT_BRANCH,
+                "Merge $branch into $DEFAULT_BRANCH",
                 "PR created by RET using `ret pr create --no-prompt`.",
             ),
         ).thenReturn(PullRequestCreated(createdPullRequestId))
 
-        val exitCode = commandLine.execute("-r", repo, "--no-prompt", branch)
+        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", branch)
         assertThat(exitCode).isEqualTo(0)
         verify(outputHandler)
-            .println("$BASE_URL/pullrequest/$repo/$createdPullRequestId")
+            .println("$BASE_URL/pullrequest/$REPO/$createdPullRequestId")
     }
 
     @Test
     fun `create should handle if PR is already created with --no-prompt`() {
         val branch = "feature/my-branch"
-        val repo = "generic-project"
-        val defaultBranch = "defaultBranch"
 
-        whenever(gitProvider.getRepositoryById(repo)).thenReturn(Repository(repo, defaultBranch))
+        whenever(gitProvider.getRepositoryById(REPO)).thenReturn(Repository(REPO, DEFAULT_BRANCH))
         whenever(gitProvider.createPullRequest(anyString(), anyString(), anyString(), anyString(), anyString()))
             .thenThrow(ClientWebApplicationException(Response.Status.CONFLICT))
 
-        val exitCode = commandLine.execute("-r", repo, "--no-prompt", branch)
+        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", branch)
         assertThat(exitCode).isEqualTo(1)
         verify(outputHandler).error("A pull request for this branch already exists!")
     }
 
     @Test
     fun `create should handle if current branch is the same as the default branch with --no-prompt`() {
-        val branch = "defaultBranch"
-        val repo = "generic-project"
-        val defaultBranch = "defaultBranch"
-
-        whenever(gitProvider.getRepositoryById(repo)).thenReturn(Repository(repo, defaultBranch))
-
-        val exitCode = commandLine.execute("-r", repo, "--no-prompt", branch)
+        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", DEFAULT_BRANCH)
         assertThat(exitCode).isEqualTo(2)
         verify(outputHandler).error("Could not create PR. Source branch is the same as the default branch.")
     }
 
     @Test
     fun `create should handle if no git context available with --no-prompt`() {
-        val repo = "generic-project"
-
-        val exitCode = commandLine.execute("-r", repo, "--no-prompt")
+        val exitCode = commandLine.execute("-r", REPO, "--no-prompt")
         assertThat(exitCode).isEqualTo(2)
         verify(outputHandler).error("Could not determine branch from context. Please provide the branch.")
     }

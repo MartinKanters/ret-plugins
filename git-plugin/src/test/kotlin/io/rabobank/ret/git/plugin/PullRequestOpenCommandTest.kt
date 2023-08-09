@@ -54,7 +54,7 @@ internal class PullRequestOpenCommandTest {
             PullRequest(
                 "1234",
                 "PR Title",
-                Repository("repo", "refs/heads/master"),
+                Repository("repo", "master"),
                 listOf(Reviewer("manks@live.com")),
             ),
         )
@@ -72,7 +72,7 @@ internal class PullRequestOpenCommandTest {
             PullRequest(
                 "1234",
                 "PR Title",
-                Repository("repo", "refs/heads/master"),
+                Repository("repo", "master"),
                 listOf(Reviewer("manks@live.com")),
             ),
         )
@@ -101,7 +101,7 @@ internal class PullRequestOpenCommandTest {
             PullRequest(
                 "1234",
                 "PR Title",
-                Repository("repo", "refs/heads/master"),
+                Repository("repo", "master"),
                 listOf(Reviewer("manks@live.com")),
             ),
         )

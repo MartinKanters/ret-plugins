@@ -65,16 +65,13 @@ data class Repository(
     @JsonProperty("name") val name: String,
     @JsonProperty("defaultBranch") val defaultBranch: String?,
 ) : GitDomainConvertible<GenericRepository> {
-    override fun toGenericDomain() = GenericRepository(name, defaultBranch)
+    override fun toGenericDomain() = GenericRepository(name, defaultBranch?.substringAfter("refs/heads/"))
 }
 
 data class Branch(
     @JsonProperty("name") val name: String,
 ) : GitDomainConvertible<GenericBranch> {
-    override fun toGenericDomain(): GenericBranch {
-        val shortName = name.substringAfter("refs/heads/")
-        return GenericBranch(name, shortName)
-    }
+    override fun toGenericDomain() = GenericBranch(name.substringAfter("refs/heads/"))
 }
 
 data class Pipeline(
