@@ -52,7 +52,7 @@ class PipelineCommand(
             val resolvedPipelineId = if (pipelineId.matches(DIGITS_PATTERN)) {
                 pipelineId
             } else {
-                getPipelineByUniqueName(repository, pipelineId).id.toString()
+                getPipelineByUniqueName(repository, pipelineId).id
             }
             gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
         } else gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
