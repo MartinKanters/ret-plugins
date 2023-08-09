@@ -72,7 +72,7 @@ data class Branch(@JsonProperty("name") val name: String) : GitDomainConvertible
 }
 
 data class Pipeline(
-    @JsonProperty("id") val id: Int,
+    @JsonProperty("id") val id: String,
     @JsonProperty("name") val name: String,
     @JsonProperty("folder") val folder: String,
 ) : GitDomainConvertible<GenericPipeline> {
@@ -84,7 +84,7 @@ data class Pipeline(
 }
 
 data class PipelineRun(
-    @JsonProperty("id") val id: Int,
+    @JsonProperty("id") val id: String,
     @JsonProperty("name") val name: String,
     @JsonProperty("createdDate") val createdDate: ZonedDateTime,
     @JsonProperty("state") val state: PipelineRunState,

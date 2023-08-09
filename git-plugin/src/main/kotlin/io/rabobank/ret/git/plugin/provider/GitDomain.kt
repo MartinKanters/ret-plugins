@@ -32,7 +32,7 @@ data class Branch(
 ) : GitDomain
 
 data class Pipeline(
-    val id: Int,
+    val id: String,
     val name: String,
 
     /**
@@ -49,7 +49,7 @@ data class Pipeline(
 ) : GitDomain
 
 data class PipelineRun(
-    val id: Int,
+    val id: String,
     val name: String,
     val createdDate: ZonedDateTime,
     val state: PipelineRunState,

@@ -290,9 +290,9 @@ class AutoCompleteCommandTest {
         whenever(mockedRetContext.gitRepository).thenReturn("repo")
         whenever(gitProvider.getAllPipelines("repo")).thenReturn(
             listOf(
-                Pipeline(1, "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
-                Pipeline(2, "blabla", "admin-service", "admin-service\\blabla"),
-                Pipeline(3, "blabla", "blabla", "blabla\\blabla"),
+                Pipeline("1", "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
+                Pipeline("2", "blabla", "admin-service", "admin-service\\blabla"),
+                Pipeline("3", "blabla", "blabla", "blabla\\blabla"),
             ),
         )
 
@@ -303,10 +303,10 @@ class AutoCompleteCommandTest {
             argThat {
                 this.containsAll(
                     listOf(
-                        Pipeline(1, "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
-                        Pipeline(2, "blabla", "admin-service", "admin-service\\blabla"),
+                        Pipeline("1", "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
+                        Pipeline("2", "blabla", "admin-service", "admin-service\\blabla"),
                     ),
-                ) && !this.contains(Pipeline(3, "blabla", "blabla", "blabla\\blabla"))
+                ) && !this.contains(Pipeline("3", "blabla", "blabla", "blabla\\blabla"))
             },
         )
     }
@@ -316,7 +316,7 @@ class AutoCompleteCommandTest {
         whenever(mockedRetContext.gitRepository).thenReturn("repo")
         whenever(gitProvider.getAllPipelines(null)).thenReturn(
             listOf(
-                Pipeline(1, "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
+                Pipeline("1", "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
             ),
         )
 
@@ -330,7 +330,7 @@ class AutoCompleteCommandTest {
     fun `should autocomplete pipelines on folder and unique name`() {
         whenever(gitProvider.getAllPipelines(null)).thenReturn(
             listOf(
-                Pipeline(1, "blabla", "admin-service", "admin-service\\blabla"),
+                Pipeline("1", "blabla", "admin-service", "admin-service\\blabla"),
             ),
         )
 
@@ -339,7 +339,7 @@ class AutoCompleteCommandTest {
 
         verify(outputHandler).listPipelines(
             listOf(
-                Pipeline(1, "blabla", "admin-service", "admin-service\\blabla"),
+                Pipeline("1", "blabla", "admin-service", "admin-service\\blabla"),
             ),
         )
     }
@@ -353,16 +353,16 @@ class AutoCompleteCommandTest {
         val pipelineId = "123456"
         whenever(gitProvider.getPipelineRuns(pipelineId, null)).thenReturn(
             listOf(
-                PipelineRun(123, "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
+                PipelineRun("123", "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
                 PipelineRun(
-                    456,
+                    "456",
                     "name 2",
                     staticCreatedDate,
                     PipelineRunState.IN_PROGRESS,
                     PipelineRunResult.UNKNOWN,
                 ),
                 PipelineRun(
-                    789,
+                    "789",
                     "name 3",
                     staticCreatedDate,
                     PipelineRunState.COMPLETED,
@@ -379,9 +379,9 @@ class AutoCompleteCommandTest {
 
     @Test
     fun `should autocomplete pipeline-runs using the pipeline folder and name as well as id`() {
-        val pipeline = Pipeline(123456, "pipeline_name", "folder", "folder\\pipeline_name")
+        val pipeline = Pipeline("123456", "pipeline_name", "folder", "folder\\pipeline_name")
         val expectedResponse = PipelineRun(
-            123,
+            "123",
             "name",
             staticCreatedDate,
             PipelineRunState.COMPLETED,
@@ -431,14 +431,14 @@ class AutoCompleteCommandTest {
             Arguments.of(
                 "123",
                 listOf(
-                    PipelineRun(123, "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
+                    PipelineRun("123", "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
                 ),
             ),
             Arguments.of(
                 "name 3",
                 listOf(
                     PipelineRun(
-                        789,
+                        "789",
                         "name 3",
                         staticCreatedDate,
                         PipelineRunState.COMPLETED,
@@ -449,9 +449,9 @@ class AutoCompleteCommandTest {
             Arguments.of(
                 "compl",
                 listOf(
-                    PipelineRun(123, "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
+                    PipelineRun("123", "name", staticCreatedDate, PipelineRunState.COMPLETED, PipelineRunResult.CANCELED),
                     PipelineRun(
-                        789,
+                        "789",
                         "name 3",
                         staticCreatedDate,
                         PipelineRunState.COMPLETED,
@@ -463,7 +463,7 @@ class AutoCompleteCommandTest {
                 "succee",
                 listOf(
                     PipelineRun(
-                        789,
+                        "789",
                         "name 3",
                         staticCreatedDate,
                         PipelineRunState.COMPLETED,
