@@ -64,9 +64,9 @@ internal class PipelineCommandTest {
         val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
         whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
             listOf(
-                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
-                Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
-                Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
+                Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline("234", "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
+                Pipeline("345", "pipeline_name", "folder2", "folder2\\pipeline_name"),
             ),
         )
 
@@ -81,9 +81,9 @@ internal class PipelineCommandTest {
         val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
         whenever(gitProviderMock.getAllPipelines("repo-from-flag")).thenReturn(
             listOf(
-                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
-                Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
-                Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
+                Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline("234", "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
+                Pipeline("345", "pipeline_name", "folder2", "folder2\\pipeline_name"),
             ),
         )
 
@@ -97,7 +97,7 @@ internal class PipelineCommandTest {
         val pipelineId = "folder/pipeline_name2"
         whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
             listOf(
-                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
             ),
         )
 
@@ -112,9 +112,9 @@ internal class PipelineCommandTest {
         val expectedPipelineRunURL = URI.create("https://test.git/pipeline/123").toURL()
         whenever(gitProviderMock.getAllPipelines(null)).thenReturn(
             listOf(
-                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
-                Pipeline(234, "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
-                Pipeline(345, "pipeline_name", "folder2", "folder2\\pipeline_name"),
+                Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline("234", "other_pipeline_name", "folder", "folder\\other_pipeline_name"),
+                Pipeline("345", "pipeline_name", "folder2", "folder2\\pipeline_name"),
             ),
         )
         whenever(gitProviderMock.properties).thenReturn(GitProviderProperties("test", false))
@@ -129,7 +129,7 @@ internal class PipelineCommandTest {
         val pipelineId = "folder/pipeline_name2"
         whenever(gitProviderMock.getAllPipelines(null)).thenReturn(
             listOf(
-                Pipeline(123, "pipeline_name", "folder", "folder\\pipeline_name"),
+                Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
             ),
         )
 
