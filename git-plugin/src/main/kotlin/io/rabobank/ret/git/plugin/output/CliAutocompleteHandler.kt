@@ -18,7 +18,7 @@ class CliAutocompleteHandler(private val retConsole: RetConsole) : OutputHandler
     }
 
     override fun listBranches(list: List<Branch>) {
-        list.map { it.shortName }.forEach(retConsole::out)
+        list.map { it.name }.forEach(retConsole::out)
     }
 
     override fun listPipelines(list: List<Pipeline>) {

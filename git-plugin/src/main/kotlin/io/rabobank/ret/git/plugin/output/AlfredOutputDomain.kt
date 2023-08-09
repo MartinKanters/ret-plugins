@@ -47,7 +47,7 @@ data class Item(
 
     constructor(branch: Branch) :
         this(
-            title = branch.shortName,
-            arg = branch.shortName,
+            title = branch.name,
+            arg = branch.name,
         )
 }

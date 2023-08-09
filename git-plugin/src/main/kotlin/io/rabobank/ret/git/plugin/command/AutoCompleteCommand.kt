@@ -90,7 +90,7 @@ class AutoCompleteCommand(
         repository?.let { repo ->
             outputHandler.listBranches(
                 gitProvider.getAllBranches(repo)
-                    .filter { word == null || intelliSearch.matches(word, it.shortName) },
+                    .filter { word == null || intelliSearch.matches(word, it.name) },
             )
         } ?: outputHandler.error("No repository could be determined")
     }

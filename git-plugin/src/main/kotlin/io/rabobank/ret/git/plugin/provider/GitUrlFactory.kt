@@ -8,5 +8,5 @@ interface GitUrlFactory {
     fun pipeline(repositoryName: String?, pipelineId: String): URL
     fun pipelineDashboard(repositoryName: String?): URL
     fun pullRequest(repositoryName: String, pullRequestId: String): URL
-    fun pullRequestCreate(repositoryName: String, sourceRef: String?): URL
+    fun pullRequestCreate(repositoryName: String, targetRef: String, sourceRef: String?): URL
 }
