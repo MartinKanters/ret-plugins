@@ -31,9 +31,12 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.ZonedDateTime
 
+private val gitProviderProperties = GitProviderProperties.AZDO
+
 @QuarkusTest
 class AutoCompleteCommandTest {
     private lateinit var commandLine: CommandLine
+    private val gitProviderSelector = mock<GitProviderSelector>()
     private val gitProvider = mock<GitProvider>()
     private val output = StringWriter()
     private val outputHandler = mock<OutputHandler>()
@@ -45,11 +48,13 @@ class AutoCompleteCommandTest {
     fun beforeEach() {
         val command =
             AutoCompleteCommand(
-                gitProvider,
-                IntelliSearch(),
-                outputHandler,
-                mockedRetContext,
-            )
+                gitProviderSelector,
+            IntelliSearch(),
+            outputHandler,
+            mockedRetContext,
+        )
+        whenever(gitProviderSelector.all()).thenReturn(listOf(gitProvider))
+        whenever(gitProvider.providerProperties).thenReturn(GitProviderProperties.AZDO)
 
         command.contextAwareness = ContextAwareness()
         commandLine = CommandLine(command)
@@ -108,7 +113,9 @@ class AutoCompleteCommandTest {
         val exitCode = commandLine.execute("repository")
         assertThat(exitCode).isEqualTo(0)
 
-        verify(outputHandler).listRepositories(allMockedRepositories)
+        verify(outputHandler).listRepositories(
+            mapOf(gitProviderProperties to allMockedRepositories),
+        )
     }
 
     @ParameterizedTest
@@ -120,7 +127,7 @@ class AutoCompleteCommandTest {
         val exitCode = commandLine.execute("repository", "--word=$word")
         assertThat(exitCode).isEqualTo(0)
 
-        verify(outputHandler).listRepositories(repositories)
+        verify(outputHandler).listRepositories(mapOf(gitProviderProperties to repositories))
     }
 
     @Test
@@ -128,7 +135,7 @@ class AutoCompleteCommandTest {
         val exitCode = commandLine.execute("repository", "--word=blu-engineering-tools")
 
         assertThat(exitCode).isEqualTo(0)
-        verify(outputHandler).listRepositories(emptyList())
+        verify(outputHandler).listRepositories(mapOf(gitProviderProperties to emptyList()))
     }
 
     @Test
@@ -168,7 +175,7 @@ class AutoCompleteCommandTest {
         branches: List<String>,
     ) {
         assertThat(exitCode).isEqualTo(0)
-        verify(outputHandler).listBranches(branches.map { Branch(it) })
+        verify(outputHandler).listBranches(mapOf(gitProviderProperties to branches.map { Branch(it) }))
     }
 
     @Test
@@ -288,7 +295,7 @@ class AutoCompleteCommandTest {
 
     @Test
     fun gitProviderReturnsPullRequestsAutocompleteIntelligentlyOnPartialWords2() {
-        verifyPullRequestsOutputted(setOf("1272"), "pullrequest", "--word=upda")
+        verifyPullRequestsOutputted(setOf("AZDO:1272"), "pullrequest", "--word=upda")
     }
 
     @ParameterizedTest
@@ -313,12 +320,13 @@ class AutoCompleteCommandTest {
 
         verify(outputHandler).listPipelines(
             argThat {
-                this.containsAll(
+                val actualPipelines = this.entries.flatMap { it.value }
+                actualPipelines.containsAll(
                     listOf(
                         Pipeline("1", "admin-service deployment", "blabla", "blabla\\admin-service deployment"),
                         Pipeline("2", "blabla", "admin-service", "admin-service\\blabla"),
                     ),
-                ) && !this.contains(Pipeline("3", "blabla", "blabla", "blabla\\blabla"))
+                ) && !actualPipelines.contains(Pipeline("3", "blabla", "blabla", "blabla\\blabla"))
             },
         )
     }
@@ -350,9 +358,9 @@ class AutoCompleteCommandTest {
         assertThat(exitCode).isEqualTo(0)
 
         verify(outputHandler).listPipelines(
-            listOf(
+            mapOf(gitProviderProperties to listOf(
                 Pipeline("1", "blabla", "admin-service", "admin-service\\blabla"),
-            ),
+            )),
         )
     }
 
@@ -386,7 +394,7 @@ class AutoCompleteCommandTest {
         val exitCode = commandLine.execute("pipeline-run", "--pipeline-id", pipelineId, "-w", autocompletionWord)
         assertThat(exitCode).isEqualTo(0)
 
-        verify(outputHandler).listPipelineRuns(expectedOutcome)
+        verify(outputHandler).listPipelineRuns(mapOf(gitProviderProperties to expectedOutcome))
     }
 
     @Test
@@ -411,7 +419,7 @@ class AutoCompleteCommandTest {
         val exitCode = commandLine.execute("pipeline-run", "--pipeline-id", "folder\\pipeline_name")
         assertThat(exitCode).isEqualTo(0)
 
-        verify(outputHandler).listPipelineRuns(listOf(expectedResponse))
+        verify(outputHandler).listPipelineRuns(mapOf(gitProviderProperties to listOf(expectedResponse)))
     }
 
     private fun verifyPullRequestsOutputted(
@@ -422,8 +430,8 @@ class AutoCompleteCommandTest {
 
         assertThat(exitCode).isEqualTo(0)
         verify(outputHandler).listPRs(
-            allMockedPullRequests.filter { pullRequestIds.contains(it.id) },
-        )
+            mapOf(gitProviderProperties to allMockedPullRequests.filter { pullRequestIds.contains(it.id) },
+        ))
     }
 
     companion object {

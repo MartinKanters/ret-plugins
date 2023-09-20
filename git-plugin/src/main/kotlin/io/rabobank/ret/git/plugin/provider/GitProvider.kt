@@ -29,5 +29,5 @@ interface GitProvider {
 
     val urlFactory: GitUrlFactory
 
-    val properties: GitProviderProperties
+    val providerProperties: GitProviderProperties
 }

@@ -6,6 +6,7 @@ import io.rabobank.ret.git.plugin.command.PullRequestCreateCommand
 import io.rabobank.ret.git.plugin.config.ExceptionMessageHandler
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
 import io.rabobank.ret.git.plugin.provider.PullRequestCreated
 import io.rabobank.ret.git.plugin.provider.Repository
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
@@ -21,6 +22,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.contains
 import org.mockito.Mockito.spy
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -42,9 +44,9 @@ internal class PullRequestCreateCommandTest {
 
     @BeforeEach
     fun before() {
-        val command =
-            PullRequestCreateCommand(
-                gitProvider,
+        val mockedGitProviderSelector = mock<GitProviderSelector>()
+        val command = PullRequestCreateCommand(
+            mockedGitProviderSelector,
                 mockedBrowserUtils,
                 outputHandler,
                 mockedRetContext,
@@ -56,6 +58,7 @@ internal class PullRequestCreateCommandTest {
         commandLine.executionExceptionHandler = ExceptionMessageHandler(outputHandler)
         whenever(gitProvider.getRepositoryById(REPO)).thenReturn(Repository(REPO, DEFAULT_BRANCH))
         whenever(gitProvider.urlFactory).thenReturn(TestUrlFactory("https://test.git"))
+        whenever(mockedGitProviderSelector.byKey(any())).thenReturn(gitProvider)
     }
 
     @Test

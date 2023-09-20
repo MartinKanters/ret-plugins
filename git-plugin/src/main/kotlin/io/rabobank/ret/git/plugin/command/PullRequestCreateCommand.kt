@@ -2,7 +2,8 @@ package io.rabobank.ret.git.plugin.command
 
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.output.OutputHandler
-import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
+import io.rabobank.ret.git.plugin.provider.splitByProviderKeyAndValue
 import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
@@ -21,7 +22,7 @@ import picocli.CommandLine.ScopeType
 )
 @Logged
 class PullRequestCreateCommand(
-    private val gitProvider: GitProvider,
+    private val gitProviderSelector: GitProviderSelector,
     private val browserUtils: BrowserUtils,
     private val outputHandler: OutputHandler,
     private val retContext: RetContext,
@@ -54,12 +55,15 @@ class PullRequestCreateCommand(
     var filterRepository: String? = null
 
     override fun run() {
-        val repositoryName =
+        val repositoryNameWithProviderKey =
             requireNotNull(ContextUtils.resolveRepository(contextAwareness, retContext, filterRepository)) {
                 "Could not determine repository from context. Please provide the repository."
-            }
+            } // TODO things resolved from the context does not have the provider key
         val contextBranch = retContext.gitBranch
         val sourceBranch = providedBranch ?: contextBranch
+
+        val (providerKey, repositoryName) = repositoryNameWithProviderKey.splitByProviderKeyAndValue()
+        val gitProvider = gitProviderSelector.byKey(providerKey)
 
         val repository = gitProvider.getRepositoryById(repositoryName)
         val defaultBranch = requireNotNull(repository.defaultBranch) { "No default branch available." }

@@ -2,13 +2,7 @@ package io.rabobank.ret.git.plugin.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rabobank.ret.RetConsole
-import io.rabobank.ret.git.plugin.provider.Branch
-import io.rabobank.ret.git.plugin.provider.Pipeline
-import io.rabobank.ret.git.plugin.provider.PipelineRun
-import io.rabobank.ret.git.plugin.provider.PipelineRunResult
-import io.rabobank.ret.git.plugin.provider.PipelineRunState
-import io.rabobank.ret.git.plugin.provider.PullRequest
-import io.rabobank.ret.git.plugin.provider.Repository
+import io.rabobank.ret.git.plugin.provider.*
 
 class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val objectMapper: ObjectMapper) :
     OutputHandler {
@@ -20,77 +14,76 @@ class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val 
         throw UnsupportedOperationException()
     }
 
-    override fun listPRs(list: List<PullRequest>) {
+    override fun listPRs(data: Map<GitProviderProperties, List<PullRequest>>) {
         retConsole.out(
             objectMapper.writeValueAsString(
-                if (list.isEmpty()) {
+                if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No pull requests found", valid = false)))
                 } else {
-                    Wrapper(list.map { Item(it) })
+                    Wrapper(data.flatMap { entry -> entry.value.map { Item(entry.key, it) } })
                 },
             ),
         )
     }
 
-    override fun listRepositories(list: List<Repository>) {
+    override fun listRepositories(data: Map<GitProviderProperties, List<Repository>>) {
         retConsole.out(
             objectMapper.writeValueAsString(
-                if (list.isEmpty()) {
+                if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No repositories found", valid = false)))
                 } else {
-                    Wrapper(list.map { Item(it) })
+                    Wrapper(data.flatMap { entry -> entry.value.map { Item(entry.key, it) } })
                 },
             ),
         )
     }
 
-    override fun listBranches(list: List<Branch>) {
+    override fun listBranches(data: Map<GitProviderProperties, List<Branch>>) {
         retConsole.out(
             objectMapper.writeValueAsString(
-                if (list.isEmpty()) {
+                if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No branches found", valid = false)))
                 } else {
-                    Wrapper(list.map { Item(it) })
+                    Wrapper(data.flatMap { entry -> entry.value.map { Item(entry.key, it) } })
                 },
             ),
         )
     }
 
-    override fun listPipelines(list: List<Pipeline>) {
+    override fun listPipelines(data: Map<GitProviderProperties, List<Pipeline>>) {
         retConsole.out(
             objectMapper.writeValueAsString(
-                if (list.isEmpty()) {
+                if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No pipelines found", valid = false)))
-                } else {
-                    Wrapper(
-                        listOf(Item(title = "Pipeline dashboard", arg = "open-dashboard")) +
-                            list.map {
-                                Item(title = it.name, subtitle = "Folder: ${it.container}", arg = it.id)
-                            },
-                    )
-                },
+                } else {Wrapper(
+                    listOf(Item(title = "Pipeline dashboard", arg = "open-dashboard")) +
+                            data.flatMap { entry -> entry.value.map {
+                                Item(title = "${entry.key}:${it.name}", subtitle = "Folder: ${it.container}", arg = "${entry.key}:${it.id}")
+                            }
+                    },
+                )},
             ),
         )
     }
 
-    override fun listPipelineRuns(list: List<PipelineRun>) {
+    override fun listPipelineRuns(data: Map<GitProviderProperties, List<PipelineRun>>) {
         retConsole.out(
             objectMapper.writeValueAsString(
-                if (list.isEmpty()) {
+                if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No pipeline runs found", valid = false)))
-                } else {
-                    Wrapper(
-                        listOf(Item(title = "Pipeline run overview", arg = "open-dashboard")) +
-                            list.map {
-                                Item(
-                                    title = it.name,
-                                    subtitle = "State: ${it.state}, result: ${it.result}",
-                                    icon = ItemIcon("icons/${it.icon()}"),
-                                    arg = it.id,
-                                )
+                } else {Wrapper(
+                    listOf(Item(title = "Pipeline run overview", arg = "open-dashboard")) +
+                            data.flatMap { entry ->
+                                entry.value.map {
+                                    Item(
+                                        title = it.name,
+                                        subtitle = "State: ${it.state}, result: ${it.result}",
+                                        icon = ItemIcon("icons/${it.icon()}"),
+                                        arg = "${entry.key}:${it.id}",
+                                    )
+                                }
                             },
-                    )
-                },
+                )},
             ),
         )
     }

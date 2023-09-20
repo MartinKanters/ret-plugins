@@ -2,14 +2,10 @@ package io.rabobank.ret.git.plugin.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rabobank.ret.RetConsole
-import io.rabobank.ret.git.plugin.provider.Branch
-import io.rabobank.ret.git.plugin.provider.Pipeline
-import io.rabobank.ret.git.plugin.provider.PipelineRun
-import io.rabobank.ret.git.plugin.provider.PullRequest
-import io.rabobank.ret.git.plugin.provider.Repository
+import io.rabobank.ret.git.plugin.provider.*
 
 class AlfredOutputHandler(private val retConsole: RetConsole, private val objectMapper: ObjectMapper) : OutputHandler {
-    override fun listPRs(list: List<PullRequest>) {
+    override fun listPRs(data: Map<GitProviderProperties, List<PullRequest>>) {
         throw UnsupportedOperationException()
     }
 
@@ -21,19 +17,19 @@ class AlfredOutputHandler(private val retConsole: RetConsole, private val object
         retConsole.out(objectMapper.writeValueAsString(Wrapper(listOf(Item(message)))))
     }
 
-    override fun listRepositories(list: List<Repository>) {
+    override fun listRepositories(data: Map<GitProviderProperties, List<Repository>>) {
         throw UnsupportedOperationException()
     }
 
-    override fun listBranches(list: List<Branch>) {
+    override fun listBranches(data: Map<GitProviderProperties, List<Branch>>) {
         throw UnsupportedOperationException()
     }
 
-    override fun listPipelines(list: List<Pipeline>) {
+    override fun listPipelines(data: Map<GitProviderProperties, List<Pipeline>>) {
         throw UnsupportedOperationException()
     }
 
-    override fun listPipelineRuns(list: List<PipelineRun>) {
+    override fun listPipelineRuns(data: Map<GitProviderProperties, List<PipelineRun>>) {
         throw UnsupportedOperationException()
     }
 }

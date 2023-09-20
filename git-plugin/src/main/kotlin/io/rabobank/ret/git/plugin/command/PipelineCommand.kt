@@ -45,8 +45,8 @@ class PipelineCommand(
         ) repositoryFlag: String?
     ) {
         val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
-        require(repository != null || !gitProvider.properties.pipelinesTiedToRepository) {
-            "A repository has to be provided to open a pipeline for it for Git provider '${gitProvider.properties.providerName}'"
+        require(repository != null || !gitProvider.providerProperties.pipelinesTiedToRepository) {
+            "A repository has to be provided to open a pipeline for it for Git provider '${gitProvider.providerProperties.fullName}'"
         }
 
         val url =

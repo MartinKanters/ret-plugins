@@ -3,7 +3,8 @@ package io.rabobank.ret.git.plugin.command
 import io.quarkus.logging.Log
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.output.OutputHandler
-import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
+import io.rabobank.ret.git.plugin.provider.splitByProviderKeyAndValue
 import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
@@ -22,7 +23,7 @@ import picocli.CommandLine.ScopeType
 )
 @Logged
 class PullRequestOpenCommand(
-    private val gitProvider: GitProvider,
+    private val gitProviderSelector: GitProviderSelector,
     private val browserUtils: BrowserUtils,
     private val outputHandler: OutputHandler,
     private val retContext: RetContext
@@ -51,7 +52,9 @@ class PullRequestOpenCommand(
         }
 
         try {
-            val pullRequest = gitProvider.getPullRequestById(repository, pullRequestId)
+            val (providerKey, id) = pullRequestId.splitByProviderKeyAndValue()
+            val gitProvider = gitProviderSelector.byKey(providerKey)
+            val pullRequest = gitProvider.getPullRequestById(repository, id)
             val prURL = gitProvider.urlFactory.pullRequest(pullRequest.repository.name, pullRequest.id)
 
             browserUtils.openUrl(prURL)

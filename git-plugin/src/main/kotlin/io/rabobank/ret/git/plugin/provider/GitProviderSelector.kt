@@ -5,14 +5,15 @@ import io.rabobank.ret.git.plugin.provider.azure.AzureDevopsPluginConfig
 import io.rabobank.ret.git.plugin.provider.azure.AzureDevopsProvider
 import io.rabobank.ret.git.plugin.provider.azure.AzureDevopsUrlFactory
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.enterprise.inject.Produces
 
 @ApplicationScoped
 class GitProviderSelector(
-    private val azureDevopsClient: AzureDevopsClient,
-    private val pluginConfig: AzureDevopsPluginConfig,
-    private val azureDevopsUrlFactory: AzureDevopsUrlFactory,
+    azureDevopsClient: AzureDevopsClient, pluginConfig: AzureDevopsPluginConfig, azureDevopsUrlFactory: AzureDevopsUrlFactory,
 ) {
-    @Produces
-    fun gitProvider() = AzureDevopsProvider(azureDevopsClient, pluginConfig, azureDevopsUrlFactory)
+    private val azureDevOpsGitProvider = AzureDevopsProvider(azureDevopsClient, pluginConfig, azureDevopsUrlFactory)
+    private val allProviders: List<GitProvider> = listOfNotNull(azureDevOpsGitProvider)
+
+    fun all() = allProviders
+
+    fun byKey(key: GitProviderProperties): GitProvider = allProviders.first { key == it.providerProperties }
 }

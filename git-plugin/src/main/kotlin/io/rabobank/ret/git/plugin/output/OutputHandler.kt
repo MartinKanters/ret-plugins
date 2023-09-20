@@ -1,10 +1,6 @@
 package io.rabobank.ret.git.plugin.output
 
-import io.rabobank.ret.git.plugin.provider.Branch
-import io.rabobank.ret.git.plugin.provider.Pipeline
-import io.rabobank.ret.git.plugin.provider.PipelineRun
-import io.rabobank.ret.git.plugin.provider.PullRequest
-import io.rabobank.ret.git.plugin.provider.Repository
+import io.rabobank.ret.git.plugin.provider.*
 
 interface OutputHandler {
     fun println(message: String) {
@@ -15,13 +11,13 @@ interface OutputHandler {
         // No-op
     }
 
-    fun listPRs(list: List<PullRequest>)
+    fun listPRs(data: Map<GitProviderProperties, List<PullRequest>>)
 
-    fun listRepositories(list: List<Repository>)
+    fun listRepositories(data: Map<GitProviderProperties, List<Repository>>)
 
-    fun listBranches(list: List<Branch>)
+    fun listBranches(data: Map<GitProviderProperties, List<Branch>>)
 
-    fun listPipelines(list: List<Pipeline>)
+    fun listPipelines(data: Map<GitProviderProperties, List<Pipeline>>)
 
-    fun listPipelineRuns(list: List<PipelineRun>)
+    fun listPipelineRuns(data: Map<GitProviderProperties, List<PipelineRun>>)
 }

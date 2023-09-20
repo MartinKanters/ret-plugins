@@ -2,6 +2,7 @@ package io.rabobank.ret.git.plugin.output
 
 import io.quarkus.runtime.annotations.RegisterForReflection
 import io.rabobank.ret.git.plugin.provider.Branch
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
 import io.rabobank.ret.git.plugin.provider.PullRequest
 import io.rabobank.ret.git.plugin.provider.Repository
 
@@ -30,24 +31,25 @@ data class Item(
             valid = valid,
         )
 
-    constructor(pr: PullRequest) :
+    constructor(gitProviderProperties: GitProviderProperties, pr: PullRequest) :
         this(
             title = pr.title,
-            subtitle = pr.repository.name,
-            arg = pr.id,
+            subtitle = "${pr.repository.name} - ${gitProviderProperties.fullName}",
+            arg = "${gitProviderProperties.name}:${pr.id}",
             icon = ItemIcon("icons/pull_request.png"),
         )
 
-    constructor(repo: Repository) :
+    constructor(gitProviderProperties: GitProviderProperties, repo: Repository) :
         this(
             title = repo.name,
-            arg = repo.name,
+            subtitle = gitProviderProperties.fullName,
+            arg = "${gitProviderProperties.name}:${repo.name}",
             icon = ItemIcon("icons/icon_repo.png"),
         )
 
-    constructor(branch: Branch) :
+    constructor(gitProviderProperties: GitProviderProperties, branch: Branch) :
         this(
             title = branch.name,
-            arg = branch.name,
+            arg = "${gitProviderProperties.name}:${branch.name}",
         )
 }

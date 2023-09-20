@@ -11,10 +11,7 @@ class AzureDevopsProvider(
     override val urlFactory: AzureDevopsUrlFactory,
 ) : GitProvider {
 
-    override val properties = GitProviderProperties(
-        providerName = "Azure Devops",
-        pipelinesTiedToRepository = false
-    )
+    override val providerProperties = GitProviderProperties.AZDO
 
     override fun getAllPullRequests()= azureDevopsClient.getAllPullRequests().value.toGenericDomain()
 

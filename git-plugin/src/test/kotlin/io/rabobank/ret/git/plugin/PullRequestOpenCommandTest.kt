@@ -4,10 +4,7 @@ import io.quarkus.test.junit.QuarkusTest
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.command.PullRequestOpenCommand
 import io.rabobank.ret.git.plugin.output.OutputHandler
-import io.rabobank.ret.git.plugin.provider.GitProvider
-import io.rabobank.ret.git.plugin.provider.PullRequest
-import io.rabobank.ret.git.plugin.provider.Repository
-import io.rabobank.ret.git.plugin.provider.Reviewer
+import io.rabobank.ret.git.plugin.provider.*
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
@@ -33,8 +30,10 @@ internal class PullRequestOpenCommandTest {
 
     @BeforeEach
     fun before() {
+        val mockedGitProviderSelector = mock<GitProviderSelector>()
+
         val command = PullRequestOpenCommand(
-            mockedGitProvider,
+            mockedGitProviderSelector,
             mockedBrowserUtils,
             outputHandler,
             retContext
@@ -46,6 +45,7 @@ internal class PullRequestOpenCommandTest {
 
         whenever(mockedGitProvider.urlFactory).thenReturn(TestUrlFactory("https://test.git"))
         whenever(retContext.gitRepository).thenReturn("repo")
+        whenever(mockedGitProviderSelector.byKey(any())).thenReturn(mockedGitProvider)
     }
 
     @Test
