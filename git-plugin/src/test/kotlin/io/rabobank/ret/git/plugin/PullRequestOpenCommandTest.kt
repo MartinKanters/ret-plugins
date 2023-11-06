@@ -59,7 +59,7 @@ internal class PullRequestOpenCommandTest {
             ),
         )
 
-        val exitCode = commandLine.execute("1234")
+        val exitCode = commandLine.execute("AZDO:1234")
         assertThat(exitCode).isEqualTo(0)
         val expectedURL = URI.create("$BASE_URL/pullrequest/repo/1234").toURL()
 
@@ -77,7 +77,7 @@ internal class PullRequestOpenCommandTest {
             ),
         )
 
-        val exitCode = commandLine.execute("1234", "-r", "actualRepo")
+        val exitCode = commandLine.execute("AZDO:1234", "-r", "actualRepo")
         assertThat(exitCode).isEqualTo(0)
         val expectedURL = URI.create("$BASE_URL/pullrequest/repo/1234").toURL()
 
@@ -90,9 +90,9 @@ internal class PullRequestOpenCommandTest {
             ClientWebApplicationException(404),
         )
 
-        val exitCode = commandLine.execute("12345")
+        val exitCode = commandLine.execute("AZDO:12345")
         assertThat(exitCode).isEqualTo(1)
-        verify(outputHandler).error("Pull request with id '12345' could not be found")
+        verify(outputHandler).error("Pull request with id 'AZDO:12345' could not be found")
     }
 
     @Test

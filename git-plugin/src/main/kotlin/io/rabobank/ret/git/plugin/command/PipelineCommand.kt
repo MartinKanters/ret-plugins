@@ -2,6 +2,8 @@ package io.rabobank.ret.git.plugin.command
 
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
+import io.rabobank.ret.git.plugin.provider.splitByProviderKeyAndValue
 import io.rabobank.ret.git.plugin.utils.ContextUtils
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
@@ -16,7 +18,7 @@ import picocli.CommandLine.*
 @Logged
 class PipelineCommand(
     private val browserUtils: BrowserUtils,
-    private val gitProvider: GitProvider,
+    private val gitProviderSelector: GitProviderSelector,
     private val retContext: RetContext,
 ) {
 
@@ -30,7 +32,7 @@ class PipelineCommand(
             description = ["Pipeline id or <folder>\\<pipeline-name>"],
             paramLabel = "<pipeline_id>",
             completionCandidates = PipelineCompletionCandidates::class,
-        ) pipelineId: String?,
+        ) pipelineIdByProvider: String?,
         @Parameters(
             arity = "0..1",
             description = ["Pipeline run to open"],
@@ -44,30 +46,40 @@ class PipelineCommand(
             completionCandidates = RepositoryFlagCompletionCandidates::class,
         ) repositoryFlag: String?
     ) {
-        val repository = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
-        require(repository != null || !gitProvider.providerProperties.pipelinesTiedToRepository) {
-            "A repository has to be provided to open a pipeline for it for Git provider '${gitProvider.providerProperties.fullName}'"
+        val repositoryByProvider = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
+        val (gitProviderKey, repository) = repositoryByProvider?.splitByProviderKeyAndValue() ?: (null to null)
+        val gitProviderFromContext = gitProviderKey?.let { gitProviderSelector.byKey(it) }
+        require(!(repository == null && gitProviderFromContext?.providerProperties?.pipelinesTiedToRepository == true)) {
+            val gitProviderName = gitProviderFromContext?.providerProperties?.fullName ?: "not-set"
+            "A repository has to be provided to open a pipeline for it for Git provider '$gitProviderName'"
         }
 
-        val url =
-            if (pipelineId == null) {
-                gitProvider.urlFactory.pipelineDashboard(repository)
-            } else if (pipelineRunId == null) {
-                val resolvedPipelineId =
-                    if (pipelineId.matches(DIGITS_PATTERN)) {
-                        pipelineId
-                    } else {
-                        getPipelineByUniqueName(repository, pipelineId).id
-                    }
-                gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
-            } else {
-                gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
-            }
+        if (pipelineIdByProvider == null) {
+            gitProviderSelector.all()
+                .map { it.urlFactory.pipelineDashboard(repository) }
+                .forEach { browserUtils.openUrl(it) }
+            return
+        }
+
+        val (pipelineProviderKey, pipelineId) = pipelineIdByProvider.splitByProviderKeyAndValue()
+        val gitProvider = gitProviderFromContext ?: gitProviderSelector.byKey(pipelineProviderKey)
+
+        val url = if (pipelineRunId == null) {
+            val resolvedPipelineId =
+                if (pipelineId.matches(DIGITS_PATTERN)) {
+                    pipelineId
+                } else {
+                    getPipelineByUniqueName(gitProvider, repository, pipelineId).id
+                }
+            gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
+        } else {
+            gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
+        }
 
         browserUtils.openUrl(url)
     }
 
-    private fun getPipelineByUniqueName(repositoryName: String?, pipelineId: String?) =
+    private fun getPipelineByUniqueName(gitProvider: GitProvider, repositoryName: String?, pipelineId: String?) =
         requireNotNull(gitProvider.getAllPipelines(repositoryName).firstOrNull { it.uniqueName == pipelineId }) {
             "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineId'"
         }

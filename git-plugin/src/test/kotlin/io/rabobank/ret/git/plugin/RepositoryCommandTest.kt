@@ -7,6 +7,8 @@ import io.rabobank.ret.git.plugin.command.RepositoryCommand
 import io.rabobank.ret.git.plugin.config.ExceptionMessageHandler
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
 import io.rabobank.ret.git.plugin.provider.Repository
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
 import io.rabobank.ret.picocli.mixin.ContextAwareness
@@ -17,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.Mockito.contains
+import org.mockito.Mockito.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -37,12 +39,14 @@ internal class RepositoryCommandTest {
 
     @BeforeEach
     fun before() {
-        val command =
-            RepositoryCommand(
-                mockedGitProvider,
+        val mockedGitProviderSelector = mock<GitProviderSelector>()
+        val command = RepositoryCommand(
+            mockedGitProviderSelector,
                 mockedBrowserUtils,
                 mockedRetContext,
             )
+
+        `when`(mockedGitProviderSelector.byKey(GitProviderProperties.AZDO)).thenReturn(mockedGitProvider)
 
         command.contextAwareness = ContextAwareness()
 
@@ -69,7 +73,7 @@ internal class RepositoryCommandTest {
     @ParameterizedTest
     @ValueSource(strings = ["admin-service", "bto-apmd", "open-source-tool"])
     fun `repository open command should open browser with repository url`(repository: String) {
-        val exitCode = commandLine.execute("open", repository)
+        val exitCode = commandLine.execute("open", "AZDO:$repository")
         assertThat(exitCode).isEqualTo(0)
 
         val repoUrl = URI.create("https://test.git/repository/$repository").toURL()
@@ -80,7 +84,7 @@ internal class RepositoryCommandTest {
     @Test
     fun `repository open command without argument should use context awareness`() {
         val repository = "generic-project"
-        whenever(mockedRetContext.gitRepository).thenReturn(repository)
+        whenever(mockedRetContext.gitRepository).thenReturn("AZDO:$repository")
 
         val exitCode = commandLine.execute("open")
         assertThat(exitCode).isEqualTo(0)
@@ -93,9 +97,9 @@ internal class RepositoryCommandTest {
     @Test
     fun `repository open command with argument and context awareness should use argument`() {
         val repository = "open-source-tool"
-        whenever(mockedRetContext.gitRepository).thenReturn("generic-project")
+        whenever(mockedRetContext.gitRepository).thenReturn("AZDO:generic-project")
 
-        val exitCode = commandLine.execute("open", repository)
+        val exitCode = commandLine.execute("open", "AZDO:$repository")
         assertThat(exitCode).isEqualTo(0)
 
         val repoUrl = URI.create("https://test.git/repository/$repository").toURL()
@@ -114,11 +118,11 @@ internal class RepositoryCommandTest {
 
     @Test
     fun `repository open command should log if repository does not exists`() {
-        val repositoryThatDoesNotExist = "bto-generic-source-admin-gateway"
+        val repositoryThatDoesNotExist = "AZDO:bto-generic-source-admin-gateway"
         val exitCode = commandLine.execute("open", repositoryThatDoesNotExist)
         assertThat(exitCode).isEqualTo(2)
 
-        verify(outputHandler).error("No repository found with name bto-generic-source-admin-gateway.")
+        verify(outputHandler).error("No repository found with name bto-generic-source-admin-gateway for provider AZDO.")
         verify(outputHandler).error(contains("Usage:"))
     }
 }

@@ -63,7 +63,7 @@ internal class PullRequestCreateCommandTest {
 
     @Test
     fun `create should open web page to create pr in context aware case`() {
-        whenever(mockedRetContext.gitRepository).thenReturn(REPO)
+        whenever(mockedRetContext.gitRepository).thenReturn("AZDO:$REPO")
         whenever(mockedRetContext.gitBranch).thenReturn("feature/my-branch")
 
         val exitCode = commandLine.execute()
@@ -78,7 +78,7 @@ internal class PullRequestCreateCommandTest {
     @ParameterizedTest
     @ValueSource(strings = ["--repository", "-r"])
     fun `create should open web page to create pr when repo and branch are provided`(flag: String) {
-        val exitCode = commandLine.execute(flag, REPO, "feature/my-branch")
+        val exitCode = commandLine.execute(flag, "AZDO:$REPO", "feature/my-branch")
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL =
@@ -92,7 +92,7 @@ internal class PullRequestCreateCommandTest {
     fun `create should open web page to create pr without selected branch, when repo provided and branch not`(
         flag: String,
     ) {
-        val exitCode = commandLine.execute(flag, REPO)
+        val exitCode = commandLine.execute(flag, "AZDO:$REPO")
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL = URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/").toURL()
@@ -105,9 +105,9 @@ internal class PullRequestCreateCommandTest {
     fun `create should open web page to create pr without selected branch, when repo provided and branch from context`(
         flag: String,
     ) {
-        whenever(mockedRetContext.gitBranch).thenReturn("feature/my-branch")
+        whenever(mockedRetContext.gitBranch).thenReturn("AZDO:feature/my-branch")
 
-        val exitCode = commandLine.execute(flag, REPO)
+        val exitCode = commandLine.execute(flag, "AZDO:$REPO")
         assertThat(exitCode).isEqualTo(0)
 
         val expectedURL = URI.create("$BASE_URL/pullrequest/create/$REPO/$DEFAULT_BRANCH/").toURL()
@@ -117,7 +117,7 @@ internal class PullRequestCreateCommandTest {
 
     @Test
     fun `create should open web page to create pr when branch provided, repo from context`() {
-        whenever(mockedRetContext.gitRepository).thenReturn(REPO)
+        whenever(mockedRetContext.gitRepository).thenReturn("AZDO:$REPO")
 
         val exitCode = commandLine.execute("feature/my-branch")
         assertThat(exitCode).isEqualTo(0)
@@ -154,7 +154,7 @@ internal class PullRequestCreateCommandTest {
             ),
         ).thenReturn(PullRequestCreated(createdPullRequestId))
 
-        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", branch)
+        val exitCode = commandLine.execute("-r", "AZDO:$REPO", "--no-prompt", branch)
         assertThat(exitCode).isEqualTo(0)
         verify(outputHandler)
             .println("$BASE_URL/pullrequest/$REPO/$createdPullRequestId")
@@ -168,21 +168,21 @@ internal class PullRequestCreateCommandTest {
         whenever(gitProvider.createPullRequest(anyString(), anyString(), anyString(), anyString(), anyString()))
             .thenThrow(ClientWebApplicationException(Response.Status.CONFLICT))
 
-        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", branch)
+        val exitCode = commandLine.execute("-r", "AZDO:$REPO", "--no-prompt", branch)
         assertThat(exitCode).isEqualTo(1)
         verify(outputHandler).error("A pull request for this branch already exists!")
     }
 
     @Test
     fun `create should handle if current branch is the same as the default branch with --no-prompt`() {
-        val exitCode = commandLine.execute("-r", REPO, "--no-prompt", DEFAULT_BRANCH)
+        val exitCode = commandLine.execute("-r", "AZDO:$REPO", "--no-prompt", DEFAULT_BRANCH)
         assertThat(exitCode).isEqualTo(2)
         verify(outputHandler).error("Could not create PR. Source branch is the same as the default branch.")
     }
 
     @Test
     fun `create should handle if no git context available with --no-prompt`() {
-        val exitCode = commandLine.execute("-r", REPO, "--no-prompt")
+        val exitCode = commandLine.execute("-r", "AZDO:$REPO", "--no-prompt")
         assertThat(exitCode).isEqualTo(2)
         verify(outputHandler).error("Could not determine branch from context. Please provide the branch.")
     }

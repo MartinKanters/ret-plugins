@@ -22,10 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import picocli.CommandLine
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -54,6 +51,7 @@ class AutoCompleteCommandTest {
             mockedRetContext,
         )
         whenever(gitProviderSelector.all()).thenReturn(listOf(gitProvider))
+        whenever(gitProviderSelector.byKey(any())).thenReturn(gitProvider)
         whenever(gitProvider.providerProperties).thenReturn(GitProviderProperties.AZDO)
 
         command.contextAwareness = ContextAwareness()
@@ -295,7 +293,7 @@ class AutoCompleteCommandTest {
 
     @Test
     fun gitProviderReturnsPullRequestsAutocompleteIntelligentlyOnPartialWords2() {
-        verifyPullRequestsOutputted(setOf("AZDO:1272"), "pullrequest", "--word=upda")
+        verifyPullRequestsOutputted(setOf("1272"), "pullrequest", "--word=upda")
     }
 
     @ParameterizedTest
@@ -416,7 +414,7 @@ class AutoCompleteCommandTest {
         whenever(gitProvider.getPipelineRuns(pipeline.id, null))
             .thenReturn(listOf(expectedResponse))
 
-        val exitCode = commandLine.execute("pipeline-run", "--pipeline-id", "folder\\pipeline_name")
+        val exitCode = commandLine.execute("pipeline-run", "--pipeline-id", "AZDO:folder\\pipeline_name")
         assertThat(exitCode).isEqualTo(0)
 
         verify(outputHandler).listPipelineRuns(mapOf(gitProviderProperties to listOf(expectedResponse)))
