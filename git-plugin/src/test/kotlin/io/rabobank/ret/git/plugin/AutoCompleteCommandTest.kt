@@ -7,6 +7,8 @@ import io.rabobank.ret.git.plugin.command.AutoCompleteCommand
 import io.rabobank.ret.git.plugin.output.OutputHandler
 import io.rabobank.ret.git.plugin.provider.Branch
 import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
 import io.rabobank.ret.git.plugin.provider.Pipeline
 import io.rabobank.ret.git.plugin.provider.PipelineRun
 import io.rabobank.ret.git.plugin.provider.PipelineRunResult
@@ -22,7 +24,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import picocli.CommandLine
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -38,18 +44,39 @@ class AutoCompleteCommandTest {
     private val output = StringWriter()
     private val outputHandler = mock<OutputHandler>()
     private val mockedRetContext = mock<RetContext>()
-    private lateinit var allMockedPullRequests: List<PullRequest>
-    private lateinit var allMockedRepositories: List<Repository>
+    private var allMockedPullRequests =
+        listOf(
+            PullRequest(
+                "1234",
+                "PR Title",
+                Repository("repo", "master"),
+                listOf(Reviewer("manks@live.com")),
+            ),
+            PullRequest(
+                "1235",
+                "Add logo",
+                Repository("generic-project", "master"),
+                listOf(Reviewer("manks@live.com")),
+            ),
+            PullRequest("1241", "NOJIRA: ahum", Repository("ret-engineering-tools", "master"), listOf()),
+            PullRequest(
+                "1271",
+                "NOJIRA: MANKS",
+                Repository("ret-engineering-tools", "master"),
+                listOf(),
+            ),
+            PullRequest("1272", "update admin-service", Repository("test", "master"), listOf()),
+        )
 
     @BeforeEach
     fun beforeEach() {
         val command =
             AutoCompleteCommand(
                 gitProviderSelector,
-            IntelliSearch(),
-            outputHandler,
-            mockedRetContext,
-        )
+                IntelliSearch(),
+                outputHandler,
+                mockedRetContext,
+            )
         whenever(gitProviderSelector.all()).thenReturn(listOf(gitProvider))
         whenever(gitProviderSelector.byKey(any())).thenReturn(gitProvider)
         whenever(gitProvider.providerProperties).thenReturn(GitProviderProperties.AZDO)
@@ -58,14 +85,14 @@ class AutoCompleteCommandTest {
         commandLine = CommandLine(command)
         commandLine.out = PrintWriter(output)
 
-        allMockedRepositories =
+        whenever(gitProvider.getAllRepositories()).thenReturn(
             listOf(
                 Repository("admin-service", "master"),
                 Repository("client-service", "master"),
                 Repository("generic-project", "master"),
                 Repository("open-source-tool", "master"),
-            )
-        whenever(gitProvider.getAllRepositories()).thenReturn(allMockedRepositories)
+            ),
+        )
         whenever(
             gitProvider.getAllBranches(
                 "admin-service",
@@ -77,27 +104,6 @@ class AutoCompleteCommandTest {
                 Branch("feature/def"),
             ),
         )
-        allMockedPullRequests =
-            listOf(
-                PullRequest(
-                    "1234",
-                    "PR Title",
-                    Repository("repo", "master"),
-                    listOf(Reviewer("manks@live.com")),
-                ),
-                PullRequest(
-                    "1235",
-                    "Add logo",
-                    Repository("generic-project", "master"),
-                    listOf(Reviewer("manks@live.com")),
-                ),
-                PullRequest("1241", "NOJIRA: ahum", Repository("ret-engineering-tools", "master"), listOf()),
-                PullRequest(
-                    "1271", "NOJIRA: MANKS",
-                    Repository("ret-engineering-tools", "master"), listOf(),
-                ),
-                PullRequest("1272", "update admin-service", Repository("test", "master"), listOf()),
-            )
         whenever(gitProvider.getAllPullRequests()).thenReturn(allMockedPullRequests)
         whenever(gitProvider.getPullRequestsNotReviewedByUser()).thenReturn(
             allMockedPullRequests.filter {
@@ -112,7 +118,15 @@ class AutoCompleteCommandTest {
         assertThat(exitCode).isEqualTo(0)
 
         verify(outputHandler).listRepositories(
-            mapOf(gitProviderProperties to allMockedRepositories),
+            mapOf(
+                gitProviderProperties to
+                    listOf(
+                        Repository("admin-service", "master"),
+                        Repository("client-service", "master"),
+                        Repository("generic-project", "master"),
+                        Repository("open-source-tool", "master"),
+                    ),
+            ),
         )
     }
 
@@ -356,9 +370,12 @@ class AutoCompleteCommandTest {
         assertThat(exitCode).isEqualTo(0)
 
         verify(outputHandler).listPipelines(
-            mapOf(gitProviderProperties to listOf(
-                Pipeline("1", "blabla", "admin-service", "admin-service\\blabla"),
-            )),
+            mapOf(
+                gitProviderProperties to
+                    listOf(
+                        Pipeline("1", "blabla", "admin-service", "admin-service\\blabla"),
+                    ),
+            ),
         )
     }
 
@@ -428,8 +445,10 @@ class AutoCompleteCommandTest {
 
         assertThat(exitCode).isEqualTo(0)
         verify(outputHandler).listPRs(
-            mapOf(gitProviderProperties to allMockedPullRequests.filter { pullRequestIds.contains(it.id) },
-        ))
+            mapOf(
+                gitProviderProperties to allMockedPullRequests.filter { pullRequestIds.contains(it.id) },
+            ),
+        )
     }
 
     companion object {

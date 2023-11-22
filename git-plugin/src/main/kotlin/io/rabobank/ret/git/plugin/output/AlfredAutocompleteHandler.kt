@@ -2,7 +2,14 @@ package io.rabobank.ret.git.plugin.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rabobank.ret.RetConsole
-import io.rabobank.ret.git.plugin.provider.*
+import io.rabobank.ret.git.plugin.provider.Branch
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
+import io.rabobank.ret.git.plugin.provider.Pipeline
+import io.rabobank.ret.git.plugin.provider.PipelineRun
+import io.rabobank.ret.git.plugin.provider.PipelineRunResult
+import io.rabobank.ret.git.plugin.provider.PipelineRunState
+import io.rabobank.ret.git.plugin.provider.PullRequest
+import io.rabobank.ret.git.plugin.provider.Repository
 
 class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val objectMapper: ObjectMapper) :
     OutputHandler {
@@ -55,13 +62,20 @@ class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val 
             objectMapper.writeValueAsString(
                 if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No pipelines found", valid = false)))
-                } else {Wrapper(
-                    listOf(Item(title = "Pipeline dashboard", arg = "open-dashboard")) +
-                            data.flatMap { entry -> entry.value.map {
-                                Item(title = "${entry.key}:${it.name}", subtitle = "Folder: ${it.container}", arg = "${entry.key}:${it.id}")
-                            }
-                    },
-                )},
+                } else {
+                    Wrapper(
+                        listOf(Item(title = "Pipeline dashboard", arg = "open-dashboard")) +
+                            data.flatMap { entry ->
+                                entry.value.map {
+                                    Item(
+                                        title = "${entry.key}:${it.name}",
+                                        subtitle = "Folder: ${it.container}",
+                                        arg = "${entry.key}:${it.id}",
+                                    )
+                                }
+                            },
+                    )
+                },
             ),
         )
     }
@@ -71,8 +85,9 @@ class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val 
             objectMapper.writeValueAsString(
                 if (data.all { it.value.isEmpty() }) {
                     Wrapper(listOf(Item("No pipeline runs found", valid = false)))
-                } else {Wrapper(
-                    listOf(Item(title = "Pipeline run overview", arg = "open-dashboard")) +
+                } else {
+                    Wrapper(
+                        listOf(Item(title = "Pipeline run overview", arg = "open-dashboard")) +
                             data.flatMap { entry ->
                                 entry.value.map {
                                     Item(
@@ -83,7 +98,8 @@ class AlfredAutocompleteHandler(private val retConsole: RetConsole, private val 
                                     )
                                 }
                             },
-                )},
+                    )
+                },
             ),
         )
     }

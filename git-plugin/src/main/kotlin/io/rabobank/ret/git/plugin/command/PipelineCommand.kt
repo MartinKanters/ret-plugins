@@ -9,7 +9,11 @@ import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
 import io.rabobank.ret.util.Logged
 import io.rabobank.ret.util.RegexUtils.DIGITS_PATTERN
-import picocli.CommandLine.*
+import picocli.CommandLine.Command
+import picocli.CommandLine.Mixin
+import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
+import picocli.CommandLine.ScopeType
 
 @Command(
     name = "pipeline",
@@ -21,7 +25,6 @@ class PipelineCommand(
     private val gitProviderSelector: GitProviderSelector,
     private val retContext: RetContext,
 ) {
-
     @Mixin
     lateinit var contextAwareness: ContextAwareness
 
@@ -44,12 +47,14 @@ class PipelineCommand(
             description = ["Filter on repository"],
             scope = ScopeType.INHERIT,
             completionCandidates = RepositoryFlagCompletionCandidates::class,
-        ) repositoryFlag: String?
+        ) repositoryFlag: String?,
     ) {
         val repositoryByProvider = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
         val (gitProviderKey, repository) = repositoryByProvider?.splitByProviderKeyAndValue() ?: (null to null)
         val gitProviderFromContext = gitProviderKey?.let { gitProviderSelector.byKey(it) }
-        require(!(repository == null && gitProviderFromContext?.providerProperties?.pipelinesTiedToRepository == true)) {
+        require(
+            !(repository == null && gitProviderFromContext?.providerProperties?.pipelinesTiedToRepository == true),
+        ) {
             val gitProviderName = gitProviderFromContext?.providerProperties?.fullName ?: "not-set"
             "A repository has to be provided to open a pipeline for it for Git provider '$gitProviderName'"
         }
@@ -64,25 +69,29 @@ class PipelineCommand(
         val (pipelineProviderKey, pipelineId) = pipelineIdByProvider.splitByProviderKeyAndValue()
         val gitProvider = gitProviderFromContext ?: gitProviderSelector.byKey(pipelineProviderKey)
 
-        val url = if (pipelineRunId == null) {
-            val resolvedPipelineId =
-                if (pipelineId.matches(DIGITS_PATTERN)) {
-                    pipelineId
-                } else {
-                    getPipelineByUniqueName(gitProvider, repository, pipelineId).id
-                }
-            gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
-        } else {
-            gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
-        }
+        val url =
+            if (pipelineRunId == null) {
+                val resolvedPipelineId =
+                    if (pipelineId.matches(DIGITS_PATTERN)) {
+                        pipelineId
+                    } else {
+                        getPipelineByUniqueName(gitProvider, repository, pipelineId).id
+                    }
+                gitProvider.urlFactory.pipeline(repository, resolvedPipelineId)
+            } else {
+                gitProvider.urlFactory.pipelineRun(repository, pipelineRunId)
+            }
 
         browserUtils.openUrl(url)
     }
 
-    private fun getPipelineByUniqueName(gitProvider: GitProvider, repositoryName: String?, pipelineId: String?) =
-        requireNotNull(gitProvider.getAllPipelines(repositoryName).firstOrNull { it.uniqueName == pipelineId }) {
-            "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineId'"
-        }
+    private fun getPipelineByUniqueName(
+        gitProvider: GitProvider,
+        repositoryName: String?,
+        pipelineId: String?,
+    ) = requireNotNull(gitProvider.getAllPipelines(repositoryName).firstOrNull { it.uniqueName == pipelineId }) {
+        "Could not find pipeline id by <folder>\\<pipeline-name> combination: '$pipelineId'"
+    }
 }
 
 internal class PipelineCompletionCandidates : Iterable<String> {

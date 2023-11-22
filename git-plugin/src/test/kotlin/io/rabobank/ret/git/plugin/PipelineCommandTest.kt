@@ -2,7 +2,11 @@ package io.rabobank.ret.git.plugin
 
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.command.PipelineCommand
-import io.rabobank.ret.git.plugin.provider.*
+import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderProperties
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
+import io.rabobank.ret.git.plugin.provider.GitUrlFactory
+import io.rabobank.ret.git.plugin.provider.Pipeline
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
 import io.rabobank.ret.util.BrowserUtils
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +21,7 @@ import picocli.CommandLine
 import java.net.URI
 import java.net.URL
 
-private const val repositoryFromContext = "AZDO:REPO_FROM_CONTEXT"
+private const val REPOSITORY_FROM_CONTEXT = "AZDO:REPO_FROM_CONTEXT"
 
 internal class PipelineCommandTest {
     private val browserUtilsMock = mock<BrowserUtils>()
@@ -37,7 +41,7 @@ internal class PipelineCommandTest {
         commandLine = CommandLine(command)
 
         whenever(gitProviderMock.urlFactory).thenReturn(gitUrlFactory)
-        whenever(retContext.gitRepository).thenReturn(repositoryFromContext)
+        whenever(retContext.gitRepository).thenReturn(REPOSITORY_FROM_CONTEXT)
     }
 
     @Test
@@ -96,7 +100,7 @@ internal class PipelineCommandTest {
     @Test
     fun `should not open browser for pipeline by folder and name when name is incorrect`() {
         val pipelineId = "AZDO:folder/pipeline_name2"
-        whenever(gitProviderMock.getAllPipelines(repositoryFromContext)).thenReturn(
+        whenever(gitProviderMock.getAllPipelines(REPOSITORY_FROM_CONTEXT)).thenReturn(
             listOf(
                 Pipeline("123", "pipeline_name", "folder", "folder\\pipeline_name"),
             ),

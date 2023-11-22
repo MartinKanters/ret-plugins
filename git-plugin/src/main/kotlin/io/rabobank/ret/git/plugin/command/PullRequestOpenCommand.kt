@@ -26,7 +26,7 @@ class PullRequestOpenCommand(
     private val gitProviderSelector: GitProviderSelector,
     private val browserUtils: BrowserUtils,
     private val outputHandler: OutputHandler,
-    private val retContext: RetContext
+    private val retContext: RetContext,
 ) : Runnable {
     @Mixin
     lateinit var contextAwareness: ContextAwareness
@@ -47,9 +47,10 @@ class PullRequestOpenCommand(
     var pullRequestId: String = ""
 
     override fun run() {
-        val repository = requireNotNull(ContextUtils.resolveRepository(contextAwareness, retContext, filterRepository)) {
-            "Opening PR for id: '$pullRequestId' is impossible, because there is no repository known"
-        }
+        val repository =
+            requireNotNull(ContextUtils.resolveRepository(contextAwareness, retContext, filterRepository)) {
+                "Opening PR for id: '$pullRequestId' is impossible, because there is no repository known"
+            }
 
         try {
             val (providerKey, id) = pullRequestId.splitByProviderKeyAndValue()

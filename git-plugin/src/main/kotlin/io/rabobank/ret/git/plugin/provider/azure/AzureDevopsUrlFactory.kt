@@ -17,14 +17,20 @@ class AzureDevopsUrlFactory(
             .path(repositoryName)
             .buildToURL()
 
-    override fun pipelineRun(repositoryName: String?, pipelineRunId: String): URL =
+    override fun pipelineRun(
+        repositoryName: String?,
+        pipelineRunId: String,
+    ): URL =
         azdoBaseUriBuilder()
             .path("_build")
             .path("results")
             .queryParam("buildId", pipelineRunId)
             .buildToURL()
 
-    override fun pipeline(repositoryName: String?, pipelineId: String): URL =
+    override fun pipeline(
+        repositoryName: String?,
+        pipelineId: String,
+    ): URL =
         azdoBaseUriBuilder()
             .path("_build")
             .queryParam("definitionId", pipelineId)
@@ -46,7 +52,10 @@ class AzureDevopsUrlFactory(
             .path(pullRequestId)
             .buildToURL()
 
-    override fun pullRequestCreate(repositoryName: String, targetRef: String, sourceRef: String?,
+    override fun pullRequestCreate(
+        repositoryName: String,
+        targetRef: String,
+        sourceRef: String?,
     ): URL =
         azdoBaseUriBuilder()
             .path("_git")

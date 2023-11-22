@@ -53,6 +53,10 @@ class AzureDevopsProviderTest {
 
         verify(
             azureDevopsClient,
-        ).createPullRequest("repo", API_VERSION, CreatePullRequest("refs/heads/source", "refs/heads/target", "title", "desc"))
+        ).createPullRequest(
+            "repo",
+            API_VERSION,
+            CreatePullRequest("refs/heads/source", "refs/heads/target", "title", "desc"),
+        )
     }
 }

@@ -19,7 +19,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.Mockito.*
+import org.mockito.Mockito.contains
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -40,8 +41,9 @@ internal class RepositoryCommandTest {
     @BeforeEach
     fun before() {
         val mockedGitProviderSelector = mock<GitProviderSelector>()
-        val command = RepositoryCommand(
-            mockedGitProviderSelector,
+        val command =
+            RepositoryCommand(
+                mockedGitProviderSelector,
                 mockedBrowserUtils,
                 mockedRetContext,
             )

@@ -10,7 +10,6 @@ import io.rabobank.ret.util.Logged
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 import picocli.CommandLine.Parameters
-import java.lang.IllegalArgumentException
 
 @Command(
     name = "repository",
@@ -35,12 +34,18 @@ class RepositoryCommand(
         ) repositoryFlag: String?,
     ) {
         val repositoryByProvider = ContextUtils.resolveRepository(contextAwareness, retContext, repositoryFlag)
-        val (gitProviderKey, repository) = repositoryByProvider?.splitByProviderKeyAndValue() ?: throw IllegalArgumentException("No repository provided and ret cannot get repository from context.")
-            val gitProvider = gitProviderSelector.byKey(gitProviderKey)
+        val (gitProviderKey, repository) =
+            repositoryByProvider?.splitByProviderKeyAndValue()
+                ?: throw IllegalArgumentException("No repository provided and ret cannot get repository from context.")
+        val gitProvider = gitProviderSelector.byKey(gitProviderKey)
 
         val repositoriesByProvider = gitProvider.getAllRepositories()
 
-        require(repositoriesByProvider.any { it.name == repository }) { "No repository found with name $repository for provider $gitProviderKey." }
+        require(
+            repositoriesByProvider.any {
+                it.name == repository
+            },
+        ) { "No repository found with name $repository for provider $gitProviderKey." }
 
         val url = gitProvider.urlFactory.repository(repository)
         browserUtils.openUrl(url)

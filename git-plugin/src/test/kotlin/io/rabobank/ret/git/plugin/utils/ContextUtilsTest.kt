@@ -6,12 +6,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class ContextUtilsTest {
-
     @Test
     fun `repositoryFlag is prioritized`() {
         val contextAwareness = ContextAwareness()
 
-        val resolvedRepository = ContextUtils.resolveRepository(contextAwareness, RetContext(gitRepository = "repo-from-context"), "repo-from-flag")
+        val resolvedRepository =
+            ContextUtils.resolveRepository(
+                contextAwareness,
+                RetContext(gitRepository = "repo-from-context"),
+                "repo-from-flag",
+            )
 
         assertThat(resolvedRepository).isEqualTo("repo-from-flag")
     }
@@ -20,7 +24,12 @@ internal class ContextUtilsTest {
     fun `when repositoryFlag is missing, context is prioritized next`() {
         val contextAwareness = ContextAwareness()
 
-        val resolvedRepository = ContextUtils.resolveRepository(contextAwareness, RetContext(gitRepository = "repo-from-context"), null)
+        val resolvedRepository =
+            ContextUtils.resolveRepository(
+                contextAwareness,
+                RetContext(gitRepository = "repo-from-context"),
+                null,
+            )
 
         assertThat(resolvedRepository).isEqualTo("repo-from-context")
     }
@@ -29,7 +38,12 @@ internal class ContextUtilsTest {
     fun `when repositoryFlag is missing, context is ignored when context awareness is not activated`() {
         val contextAwareness = ContextAwareness().apply { ignoreContextAwareness = true }
 
-        val resolvedRepository = ContextUtils.resolveRepository(contextAwareness, RetContext(gitRepository = "repo-from-context"), null)
+        val resolvedRepository =
+            ContextUtils.resolveRepository(
+                contextAwareness,
+                RetContext(gitRepository = "repo-from-context"),
+                null,
+            )
 
         assertThat(resolvedRepository).isNull()
     }

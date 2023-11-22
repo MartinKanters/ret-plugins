@@ -8,7 +8,9 @@ import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class GitProviderSelector(
-    azureDevopsClient: AzureDevopsClient, pluginConfig: AzureDevopsPluginConfig, azureDevopsUrlFactory: AzureDevopsUrlFactory,
+    azureDevopsClient: AzureDevopsClient,
+    pluginConfig: AzureDevopsPluginConfig,
+    azureDevopsUrlFactory: AzureDevopsUrlFactory,
 ) {
     private val azureDevOpsGitProvider = AzureDevopsProvider(azureDevopsClient, pluginConfig, azureDevopsUrlFactory)
     private val allProviders: List<GitProvider> = listOfNotNull(azureDevOpsGitProvider)

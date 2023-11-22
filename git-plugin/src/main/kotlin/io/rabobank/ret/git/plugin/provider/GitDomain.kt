@@ -27,7 +27,7 @@ data class Repository(
 ) : GitDomain
 
 data class Branch(
-    val name: String
+    val name: String,
 ) : GitDomain
 
 data class Pipeline(

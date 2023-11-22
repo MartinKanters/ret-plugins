@@ -45,8 +45,9 @@ internal class PullRequestCreateCommandTest {
     @BeforeEach
     fun before() {
         val mockedGitProviderSelector = mock<GitProviderSelector>()
-        val command = PullRequestCreateCommand(
-            mockedGitProviderSelector,
+        val command =
+            PullRequestCreateCommand(
+                mockedGitProviderSelector,
                 mockedBrowserUtils,
                 outputHandler,
                 mockedRetContext,

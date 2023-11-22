@@ -1,8 +1,10 @@
 package io.rabobank.ret.git.plugin.provider
 
-enum class GitProviderProperties(val fullName: String,
-                                 val pipelinesTiedToRepository: Boolean) {
-    AZDO("Azure Devops", false)
+enum class GitProviderProperties(
+    val fullName: String,
+    val pipelinesTiedToRepository: Boolean,
+) {
+    AZDO("Azure Devops", false),
 }
 
 fun String.splitByProviderKeyAndValue(): Pair<GitProviderProperties, String> {

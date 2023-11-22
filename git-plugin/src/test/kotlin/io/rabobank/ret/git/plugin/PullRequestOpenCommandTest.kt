@@ -4,7 +4,11 @@ import io.quarkus.test.junit.QuarkusTest
 import io.rabobank.ret.RetContext
 import io.rabobank.ret.git.plugin.command.PullRequestOpenCommand
 import io.rabobank.ret.git.plugin.output.OutputHandler
-import io.rabobank.ret.git.plugin.provider.*
+import io.rabobank.ret.git.plugin.provider.GitProvider
+import io.rabobank.ret.git.plugin.provider.GitProviderSelector
+import io.rabobank.ret.git.plugin.provider.PullRequest
+import io.rabobank.ret.git.plugin.provider.Repository
+import io.rabobank.ret.git.plugin.provider.Reviewer
 import io.rabobank.ret.git.plugin.utilities.TestUrlFactory
 import io.rabobank.ret.picocli.mixin.ContextAwareness
 import io.rabobank.ret.util.BrowserUtils
@@ -13,7 +17,11 @@ import org.jboss.resteasy.reactive.ClientWebApplicationException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.spy
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import picocli.CommandLine
 import java.net.URI
 import java.net.URL
@@ -32,12 +40,13 @@ internal class PullRequestOpenCommandTest {
     fun before() {
         val mockedGitProviderSelector = mock<GitProviderSelector>()
 
-        val command = PullRequestOpenCommand(
-            mockedGitProviderSelector,
-            mockedBrowserUtils,
-            outputHandler,
-            retContext
-        )
+        val command =
+            PullRequestOpenCommand(
+                mockedGitProviderSelector,
+                mockedBrowserUtils,
+                outputHandler,
+                retContext,
+            )
 
         command.contextAwareness = ContextAwareness()
 
