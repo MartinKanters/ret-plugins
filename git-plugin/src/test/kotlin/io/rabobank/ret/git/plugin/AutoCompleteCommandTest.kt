@@ -352,7 +352,7 @@ class AutoCompleteCommandTest {
             ),
         )
 
-        val exitCode = commandLine.execute("git-pipeline", "-w", "as", "-ica")
+        val exitCode = commandLine.execute("pipeline", "-w", "as", "-ica")
         assertThat(exitCode).isEqualTo(0)
 
         verify(gitProvider).getAllPipelines(null)

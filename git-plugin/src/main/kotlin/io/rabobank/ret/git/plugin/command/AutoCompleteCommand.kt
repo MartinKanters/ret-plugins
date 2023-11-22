@@ -34,7 +34,7 @@ class AutoCompleteCommand(
     @Mixin
     lateinit var contextAwareness: ContextAwareness
 
-    @Command(name = "git-pipeline")
+    @Command(name = "pipeline")
     fun printPipelines(
         @Option(names = ["--word", "-w"]) word: String?,
         @Option(names = ["--repository", "-r"]) repositoryFlag: String?,
